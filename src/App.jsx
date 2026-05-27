@@ -1,7 +1,11 @@
+import Navbar from "./components/Navbar";
+import Hero from "./sections/Hero";
+
 function App() {
   return (
     <div>
-      <h1>Xeuj</h1>
+      <Navbar />
+      <Hero />
     </div>
   );
 }
