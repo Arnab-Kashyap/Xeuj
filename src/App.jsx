@@ -1,8 +1,12 @@
+import Navbar from "./components/Navbar";
+import Hero from "./sections/Hero";
+
 function App() {
   return (
-    <div className="h-screen bg-black text-white flex items-center justify-center text-5xl font-bold">
-      Xeuj
-    </div>
+    <>
+      <Navbar />
+      <Hero />
+    </>
   );
 }
 
