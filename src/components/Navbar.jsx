@@ -1,4 +1,5 @@
 import Logo from "./Logo";
+import NavLinks from "./NavLinks";
 
 function Navbar() {
   return (
@@ -8,10 +9,7 @@ function Navbar() {
         <Logo />
 
         <div className="hidden md:flex items-center gap-8 text-gray-700 font-medium">
-          <a href="#">Home</a>
-          <a href="#">Report</a>
-          <a href="#">Track</a>
-          <a href="#">About</a>
+          <NavLinks />
         </div>
 
         <button className="bg-green-700 text-white px-5 py-2 rounded-full font-medium hover:bg-green-800 transition">
