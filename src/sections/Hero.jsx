@@ -1,3 +1,5 @@
+import Button from "../components/Button";
+
 function Hero() {
   return (
     <section className="min-h-screen bg-green-50 pt-28 px-6">
@@ -17,9 +19,7 @@ function Hero() {
           </p>
 
           <div className="mt-8 flex gap-4">
-            <button className="bg-green-700 text-white px-6 py-3 rounded-full">
-              Report Issue
-            </button>
+            <Button text="Report Issue" />
 
             <button className="border border-green-700 text-green-700 px-6 py-3 rounded-full">
               Track Complaint
