@@ -1,13 +1,7 @@
-import Navbar from "./components/Navbar";
-import Hero from "./sections/Hero";
+import Home from "./pages/Home";
 
 function App() {
-  return (
-    <>
-      <Navbar />
-      <Hero />
-    </>
-  );
+  return <Home />;
 }
 
 export default App;
