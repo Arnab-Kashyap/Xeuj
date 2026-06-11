@@ -1,10 +1,13 @@
+import navLinks from "../utils/navLinks";
+
 function NavLinks() {
   return (
     <>
-      <a href="#">Home</a>
-      <a href="#">Report</a>
-      <a href="#">Track</a>
-      <a href="#">About</a>
+      {navLinks.map((link) => (
+        <a key={link} href="#">
+          {link}
+        </a>
+      ))}
     </>
   );
 }
