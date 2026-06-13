@@ -8,15 +8,30 @@ function Features() {
 
         <div className="grid md:grid-cols-3 gap-6">
           <div className="p-6 border rounded-xl">
-            Report Waste Issues
+            <h3 className="text-xl font-semibold mb-2">
+              Report Waste Issues
+            </h3>
+            <p className="text-gray-600">
+              Report garbage and cleanliness issues in your area.
+            </p>
           </div>
 
           <div className="p-6 border rounded-xl">
-            Report Road Problems
+            <h3 className="text-xl font-semibold mb-2">
+              Report Road Problems
+            </h3>
+            <p className="text-gray-600">
+              Report potholes, damaged roads, and traffic-related issues.
+            </p>
           </div>
 
           <div className="p-6 border rounded-xl">
-            Track Complaint Status
+            <h3 className="text-xl font-semibold mb-2">
+              Track Complaint Status
+            </h3>
+            <p className="text-gray-600">
+              Monitor complaint progress from submission to resolution.
+            </p>
           </div>
         </div>
       </div>
