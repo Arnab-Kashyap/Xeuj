@@ -1,3 +1,5 @@
+import Input from "../components/Input";
+
 function ReportIssue() {
   return (
     <div className="min-h-screen bg-green-50 py-10 px-6">
@@ -7,14 +9,15 @@ function ReportIssue() {
         </h1>
 
         <form className="space-y-4">
+
           <div>
             <label className="block mb-2 font-medium">
               Issue Title
             </label>
-            <input
+
+            <Input
               type="text"
               placeholder="Enter issue title"
-              className="w-full p-3 border rounded-lg"
             />
           </div>
 
@@ -22,6 +25,7 @@ function ReportIssue() {
             <label className="block mb-2 font-medium">
               Issue Type
             </label>
+
             <select className="w-full p-3 border rounded-lg">
               <option>Waste</option>
               <option>Road</option>
@@ -32,6 +36,7 @@ function ReportIssue() {
             <label className="block mb-2 font-medium">
               Description
             </label>
+
             <textarea
               rows="4"
               placeholder="Describe the issue"
@@ -43,10 +48,10 @@ function ReportIssue() {
             <label className="block mb-2 font-medium">
               Location
             </label>
-            <input
+
+            <Input
               type="text"
               placeholder="Enter location"
-              className="w-full p-3 border rounded-lg"
             />
           </div>
 
@@ -54,18 +59,17 @@ function ReportIssue() {
             <label className="block mb-2 font-medium">
               Upload Image
             </label>
+
             <input
               type="file"
               className="w-full p-3 border rounded-lg"
             />
           </div>
 
-          <button
-            type="submit"
-            className="w-full bg-green-700 text-white py-3 rounded-lg"
-          >
+          <button className="w-full bg-green-700 text-white py-3 rounded-lg">
             Submit Report
           </button>
+
         </form>
       </div>
     </div>

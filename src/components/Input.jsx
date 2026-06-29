@@ -3,7 +3,7 @@ function Input({ type, placeholder }) {
     <input
       type={type}
       placeholder={placeholder}
-      className="w-full p-3 border rounded-lg"
+      className="w-full p-3 border rounded-lg outline-none focus:ring-2 focus:ring-green-600"
     />
   );
 }
