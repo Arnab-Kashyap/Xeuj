@@ -1,3 +1,5 @@
+import Card from "../components/Card";
+
 function Dashboard() {
   return (
     <div className="min-h-screen bg-green-50 py-10 px-6">
@@ -7,8 +9,9 @@ function Dashboard() {
         </h1>
 
         <div className="grid gap-4">
-          <div className="bg-white p-6 rounded-xl shadow-sm border">
-            <h3 className="font-semibold">
+
+          <Card>
+            <h3 className="font-semibold text-lg">
               Garbage Dump Near Market
             </h3>
 
@@ -19,10 +22,10 @@ function Dashboard() {
             <span className="inline-block mt-3 px-3 py-1 bg-yellow-100 rounded-full text-sm">
               Under Review
             </span>
-          </div>
+          </Card>
 
-          <div className="bg-white p-6 rounded-xl shadow-sm border">
-            <h3 className="font-semibold">
+          <Card>
+            <h3 className="font-semibold text-lg">
               Road Pothole
             </h3>
 
@@ -33,7 +36,8 @@ function Dashboard() {
             <span className="inline-block mt-3 px-3 py-1 bg-green-100 rounded-full text-sm">
               Resolved
             </span>
-          </div>
+          </Card>
+
         </div>
       </div>
     </div>
