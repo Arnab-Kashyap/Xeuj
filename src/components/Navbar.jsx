@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import Logo from "./Logo";
 import NavLinks from "./NavLinks";
 
@@ -12,9 +13,13 @@ function Navbar() {
           <NavLinks />
         </div>
 
-        <button className="bg-green-700 text-white px-5 py-2 rounded-full font-medium hover:bg-green-800 transition">
+        <Link
+          to="/login"
+          className="bg-green-700 text-white px-5 py-2 rounded-full font-medium hover:bg-green-800 transition"
+        >
           Get Started
-        </button>
+        </Link>
+
       </div>
     </nav>
   );
