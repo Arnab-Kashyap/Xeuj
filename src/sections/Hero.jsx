@@ -1,4 +1,4 @@
-import Button from "../components/Button";
+import { Link } from "react-router-dom";
 
 function Hero() {
   return (
@@ -19,11 +19,19 @@ function Hero() {
           </p>
 
           <div className="mt-8 flex gap-4">
-            <Button text="Report Issue" />
+            <Link
+              to="/report"
+              className="bg-green-700 text-white px-6 py-3 rounded-full hover:bg-green-800 transition"
+            >
+              Report Issue
+            </Link>
 
-            <button className="border border-green-700 text-green-700 px-6 py-3 rounded-full">
+            <Link
+              to="/track"
+              className="border border-green-700 text-green-700 px-6 py-3 rounded-full hover:bg-green-700 hover:text-white transition"
+            >
               Track Complaint
-            </button>
+            </Link>
           </div>
         </div>
 
