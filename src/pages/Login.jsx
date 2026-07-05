@@ -5,6 +5,13 @@ function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
+  function handleSubmit(e) {
+    e.preventDefault();
+
+    console.log("Email:", email);
+    console.log("Password:", password);
+  }
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-green-50">
       <div className="w-full max-w-md bg-white p-8 rounded-2xl shadow-sm">
@@ -12,7 +19,7 @@ function Login() {
           Login
         </h1>
 
-        <form className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4">
           <Input
             type="email"
             placeholder="Email"
@@ -28,6 +35,7 @@ function Login() {
           />
 
           <button
+            type="submit"
             className="w-full bg-green-700 text-white py-3 rounded-lg"
           >
             Login
