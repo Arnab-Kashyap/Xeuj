@@ -9,11 +9,13 @@ import TrackComplaint from "../pages/TrackComplaint";
 import About from "../pages/About";
 import Contact from "../pages/Contact";
 import AdminLogin from "../pages/AdminLogin";
+import AdminDashboard from "../pages/AdminDashboard";
 
 function AppRouter() {
   return (
     <BrowserRouter>
       <Routes>
+        <Route path="/admin/dashboard" element={<AdminDashboard />} />
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />

@@ -1,9 +1,18 @@
-import API_URL from "./api";
+import axios from "axios";
 
-export async function createComplaint(data) {
-  console.log("Create Complaint:", API_URL, data);
-}
+const API = "http://localhost:5000/api/complaints";
 
-export async function getComplaints() {
-  console.log("Fetch Complaints:", API_URL);
-}
+export const createComplaint = async (complaintData) => {
+  const response = await axios.post(API, complaintData);
+  return response.data;
+};
+
+export const getAllComplaints = async () => {
+  const response = await axios.get(API);
+  return response.data;
+};
+
+export const getComplaintById = async (id) => {
+  const response = await axios.get(`${API}/${id}`);
+  return response.data;
+};

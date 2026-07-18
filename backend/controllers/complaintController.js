@@ -49,9 +49,11 @@ export const getComplaintById = async (req, res) => {
       complaint,
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: error.message,
-    });
-  }
+  console.error(error);
+
+  res.status(500).json({
+    success: false,
+    message: error.message,
+  });
+}
 };
