@@ -1,62 +1,47 @@
-import { useEffect, useState } from "react";
-import { getAllComplaints } from "../services/complaintService";
+return (
+  <div className="min-h-screen bg-gray-100 p-8">
+    <h1 className="text-3xl font-bold mb-6">
+      Admin Dashboard
+    </h1>
 
-function AdminDashboard() {
-  const [complaints, setComplaints] = useState([]);
+    <div className="bg-white rounded-xl shadow overflow-x-auto">
+      <table className="w-full border-collapse">
+        <thead className="bg-green-700 text-white">
+          <tr>
+            <th className="p-4 text-left">Title</th>
+            <th className="p-4 text-left">Category</th>
+            <th className="p-4 text-left">Location</th>
+            <th className="p-4 text-left">Status</th>
+            <th className="p-4 text-left">Department</th>
+          </tr>
+        </thead>
 
-  useEffect(() => {
-    fetchComplaints();
-  }, []);
-
-  const fetchComplaints = async () => {
-    try {
-      const data = await getAllComplaints();
-      setComplaints(data.complaints);
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
-  return (
-    <div className="min-h-screen bg-gray-100 p-8">
-      <h1 className="text-3xl font-bold mb-6">
-        Admin Dashboard
-      </h1>
-
-      <div className="grid gap-5">
-        {complaints.map((complaint) => (
-          <div
-            key={complaint._id}
-            className="bg-white p-5 rounded-xl shadow"
-          >
-            <h2 className="text-xl font-semibold">
-              {complaint.title}
-            </h2>
-
-            <p className="mt-2">
-              {complaint.description}
-            </p>
-
-            <p className="mt-3">
-              <strong>Category:</strong> {complaint.category}
-            </p>
-
-            <p>
-              <strong>Location:</strong> {complaint.location}
-            </p>
-
-            <p>
-              <strong>Status:</strong> {complaint.status}
-            </p>
-
-            <p>
-              <strong>Department:</strong> {complaint.department}
-            </p>
-          </div>
-        ))}
-      </div>
+        <tbody>
+          {complaints.length > 0 ? (
+            complaints.map((complaint) => (
+              <tr
+                key={complaint._id}
+                className="border-b hover:bg-gray-50"
+              >
+                <td className="p-4">{complaint.title}</td>
+                <td className="p-4">{complaint.category}</td>
+                <td className="p-4">{complaint.location}</td>
+                <td className="p-4">{complaint.status}</td>
+                <td className="p-4">{complaint.department}</td>
+              </tr>
+            ))
+          ) : (
+            <tr>
+              <td
+                colSpan="5"
+                className="text-center p-6 text-gray-500"
+              >
+                No complaints found.
+              </td>
+            </tr>
+          )}
+        </tbody>
+      </table>
     </div>
-  );
-}
-
-export default AdminDashboard;
+  </div>
+);
