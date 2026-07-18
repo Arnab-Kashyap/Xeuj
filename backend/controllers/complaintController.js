@@ -10,6 +10,8 @@ export const createComplaint = async (req, res) => {
       complaint,
     });
   } catch (error) {
+    console.error(error);
+
     res.status(500).json({
       success: false,
       message: error.message,
@@ -26,6 +28,8 @@ export const getAllComplaints = async (req, res) => {
       complaints,
     });
   } catch (error) {
+    console.error(error);
+
     res.status(500).json({
       success: false,
       message: error.message,
@@ -49,11 +53,79 @@ export const getComplaintById = async (req, res) => {
       complaint,
     });
   } catch (error) {
-  console.error(error);
+    console.error(error);
 
-  res.status(500).json({
-    success: false,
-    message: error.message,
-  });
-}
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+export const assignDepartment = async (req, res) => {
+  try {
+    const complaint = await Complaint.findByIdAndUpdate(
+      req.params.id,
+      {
+        department: req.body.department,
+      },
+      {
+        new: true,
+      }
+    );
+
+    if (!complaint) {
+      return res.status(404).json({
+        success: false,
+        message: "Complaint not found",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Department assigned successfully",
+      complaint,
+    });
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+export const updateComplaintStatus = async (req, res) => {
+  try {
+    const complaint = await Complaint.findByIdAndUpdate(
+      req.params.id,
+      {
+        status: req.body.status,
+      },
+      {
+        new: true,
+      }
+    );
+
+    if (!complaint) {
+      return res.status(404).json({
+        success: false,
+        message: "Complaint not found",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Status updated successfully",
+      complaint,
+    });
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
 };

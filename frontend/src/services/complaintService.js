@@ -16,3 +16,25 @@ export const getComplaintById = async (id) => {
   const response = await axios.get(`${API}/${id}`);
   return response.data;
 };
+
+export const assignDepartment = async (id, department) => {
+  const response = await axios.put(
+    `${API}/${id}/department`,
+    {
+      department,
+    }
+  );
+
+  return response.data;
+};
+
+export const updateStatus = async (id, status) => {
+  const response = await axios.put(
+    `${API}/${id}/status`,
+    {
+      status,
+    }
+  );
+
+  return response.data;
+};
