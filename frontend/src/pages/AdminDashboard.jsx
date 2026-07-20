@@ -1,5 +1,9 @@
 import { useEffect, useState } from "react";
-import { getAllComplaints } from "../services/complaintService";
+import {
+  getAllComplaints,
+  assignDepartment,
+  updateStatus,
+} from "../services/complaintService";
 
 function AdminDashboard() {
   const [complaints, setComplaints] = useState([]);
@@ -12,6 +16,24 @@ function AdminDashboard() {
     try {
       const data = await getAllComplaints();
       setComplaints(data.complaints);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const handleDepartmentChange = async (id, department) => {
+    try {
+      await assignDepartment(id, department);
+      fetchComplaints();
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const handleStatusChange = async (id, status) => {
+    try {
+      await updateStatus(id, status);
+      fetchComplaints();
     } catch (error) {
       console.log(error);
     }
@@ -30,8 +52,8 @@ function AdminDashboard() {
               <th className="p-4 text-left">Title</th>
               <th className="p-4 text-left">Category</th>
               <th className="p-4 text-left">Location</th>
-              <th className="p-4 text-left">Status</th>
               <th className="p-4 text-left">Department</th>
+              <th className="p-4 text-left">Status</th>
             </tr>
           </thead>
 
@@ -43,10 +65,56 @@ function AdminDashboard() {
                   className="border-b hover:bg-gray-50"
                 >
                   <td className="p-4">{complaint.title}</td>
+
                   <td className="p-4">{complaint.category}</td>
+
                   <td className="p-4">{complaint.location}</td>
-                  <td className="p-4">{complaint.status}</td>
-                  <td className="p-4">{complaint.department}</td>
+
+                  <td className="p-4">
+                    <select
+                      value={complaint.department}
+                      onChange={(e) =>
+                        handleDepartmentChange(
+                          complaint._id,
+                          e.target.value
+                        )
+                      }
+                      className="border rounded px-2 py-1"
+                    >
+                      <option value="Pending">Pending</option>
+                      <option value="PWD">PWD</option>
+                      <option value="Municipality">
+                        Municipality
+                      </option>
+                    </select>
+                  </td>
+
+                  <td className="p-4">
+                    <select
+                      value={complaint.status}
+                      onChange={(e) =>
+                        handleStatusChange(
+                          complaint._id,
+                          e.target.value
+                        )
+                      }
+                      className="border rounded px-2 py-1"
+                    >
+                      <option value="Pending">Pending</option>
+                      <option value="Under Review">
+                        Under Review
+                      </option>
+                      <option value="Assigned">
+                        Assigned
+                      </option>
+                      <option value="In Progress">
+                        In Progress
+                      </option>
+                      <option value="Resolved">
+                        Resolved
+                      </option>
+                    </select>
+                  </td>
                 </tr>
               ))
             ) : (
