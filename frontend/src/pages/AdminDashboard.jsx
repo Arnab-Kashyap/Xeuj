@@ -7,6 +7,7 @@ import {
 
 function AdminDashboard() {
   const [complaints, setComplaints] = useState([]);
+  const [search, setSearch] = useState("");
 
   useEffect(() => {
     fetchComplaints();
@@ -53,6 +54,12 @@ function AdminDashboard() {
     (complaint) => complaint.status === "Resolved"
   ).length;
 
+  const filteredComplaints = complaints.filter(
+    (complaint) =>
+      complaint.title.toLowerCase().includes(search.toLowerCase()) ||
+      complaint.location.toLowerCase().includes(search.toLowerCase())
+  );
+
   return (
     <div className="min-h-screen bg-gray-100 p-8">
       <h1 className="text-3xl font-bold mb-6">
@@ -66,19 +73,29 @@ function AdminDashboard() {
         </div>
 
         <div className="bg-yellow-100 p-5 rounded-xl shadow">
-          <h3 className="text-gray-700">Pending</h3>
+          <h3>Pending</h3>
           <p className="text-3xl font-bold">{pendingComplaints}</p>
         </div>
 
         <div className="bg-blue-100 p-5 rounded-xl shadow">
-          <h3 className="text-gray-700">In Progress</h3>
+          <h3>In Progress</h3>
           <p className="text-3xl font-bold">{progressComplaints}</p>
         </div>
 
         <div className="bg-green-100 p-5 rounded-xl shadow">
-          <h3 className="text-gray-700">Resolved</h3>
+          <h3>Resolved</h3>
           <p className="text-3xl font-bold">{resolvedComplaints}</p>
         </div>
+      </div>
+
+      <div className="mb-6">
+        <input
+          type="text"
+          placeholder="Search by title or location..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="w-full p-3 border rounded-lg outline-none focus:ring-2 focus:ring-green-600"
+        />
       </div>
 
       <div className="bg-white rounded-xl shadow overflow-x-auto">
@@ -94,8 +111,8 @@ function AdminDashboard() {
           </thead>
 
           <tbody>
-            {complaints.length > 0 ? (
-              complaints.map((complaint) => (
+            {filteredComplaints.length > 0 ? (
+              filteredComplaints.map((complaint) => (
                 <tr
                   key={complaint._id}
                   className="border-b hover:bg-gray-50"
