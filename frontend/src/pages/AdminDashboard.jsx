@@ -8,6 +8,7 @@ import {
 function AdminDashboard() {
   const [complaints, setComplaints] = useState([]);
   const [search, setSearch] = useState("");
+  const [category, setCategory] = useState("All");
 
   useEffect(() => {
     fetchComplaints();
@@ -43,28 +44,32 @@ function AdminDashboard() {
   const totalComplaints = complaints.length;
 
   const pendingComplaints = complaints.filter(
-    (complaint) => complaint.status === "Pending"
+    (complaint) => complaint.status === "Pending",
   ).length;
 
   const progressComplaints = complaints.filter(
-    (complaint) => complaint.status === "In Progress"
+    (complaint) => complaint.status === "In Progress",
   ).length;
 
   const resolvedComplaints = complaints.filter(
-    (complaint) => complaint.status === "Resolved"
+    (complaint) => complaint.status === "Resolved",
   ).length;
 
-  const filteredComplaints = complaints.filter(
-    (complaint) =>
-      complaint.title.toLowerCase().includes(search.toLowerCase()) ||
-      complaint.location.toLowerCase().includes(search.toLowerCase())
-  );
+  const filteredComplaints = complaints.filter((complaint) => {
+  const matchesSearch =
+    complaint.title.toLowerCase().includes(search.toLowerCase()) ||
+    complaint.location.toLowerCase().includes(search.toLowerCase());
+
+  const matchesCategory =
+    category === "All" ||
+    complaint.category === category;
+
+  return matchesSearch && matchesCategory;
+});
 
   return (
     <div className="min-h-screen bg-gray-100 p-8">
-      <h1 className="text-3xl font-bold mb-6">
-        Admin Dashboard
-      </h1>
+      <h1 className="text-3xl font-bold mb-6">Admin Dashboard</h1>
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-5 mb-8">
         <div className="bg-white p-5 rounded-xl shadow">
@@ -88,14 +93,24 @@ function AdminDashboard() {
         </div>
       </div>
 
-      <div className="mb-6">
+      <div className="flex flex-col md:flex-row gap-4 mb-6">
         <input
           type="text"
           placeholder="Search by title or location..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="w-full p-3 border rounded-lg outline-none focus:ring-2 focus:ring-green-600"
+          className="flex-1 p-3 border rounded-lg outline-none focus:ring-2 focus:ring-green-600"
         />
+
+        <select
+          value={category}
+          onChange={(e) => setCategory(e.target.value)}
+          className="p-3 border rounded-lg"
+        >
+          <option value="All">All Categories</option>
+          <option value="Road">Road</option>
+          <option value="Waste">Waste</option>
+        </select>
       </div>
 
       <div className="bg-white rounded-xl shadow overflow-x-auto">
@@ -113,10 +128,7 @@ function AdminDashboard() {
           <tbody>
             {filteredComplaints.length > 0 ? (
               filteredComplaints.map((complaint) => (
-                <tr
-                  key={complaint._id}
-                  className="border-b hover:bg-gray-50"
-                >
+                <tr key={complaint._id} className="border-b hover:bg-gray-50">
                   <td className="p-4">{complaint.title}</td>
 
                   <td className="p-4">{complaint.category}</td>
@@ -127,10 +139,7 @@ function AdminDashboard() {
                     <select
                       value={complaint.department}
                       onChange={(e) =>
-                        handleDepartmentChange(
-                          complaint._id,
-                          e.target.value
-                        )
+                        handleDepartmentChange(complaint._id, e.target.value)
                       }
                       className="border rounded px-2 py-1"
                     >
@@ -144,10 +153,7 @@ function AdminDashboard() {
                     <select
                       value={complaint.status}
                       onChange={(e) =>
-                        handleStatusChange(
-                          complaint._id,
-                          e.target.value
-                        )
+                        handleStatusChange(complaint._id, e.target.value)
                       }
                       className="border rounded px-2 py-1"
                     >
@@ -162,10 +168,7 @@ function AdminDashboard() {
               ))
             ) : (
               <tr>
-                <td
-                  colSpan="5"
-                  className="text-center p-6 text-gray-500"
-                >
+                <td colSpan="5" className="text-center p-6 text-gray-500">
                   No complaints found.
                 </td>
               </tr>
