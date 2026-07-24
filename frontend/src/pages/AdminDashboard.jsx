@@ -9,6 +9,7 @@ function AdminDashboard() {
   const [complaints, setComplaints] = useState([]);
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("All");
+  const [status, setStatus] = useState("All");
 
   useEffect(() => {
     fetchComplaints();
@@ -56,16 +57,17 @@ function AdminDashboard() {
   ).length;
 
   const filteredComplaints = complaints.filter((complaint) => {
-  const matchesSearch =
-    complaint.title.toLowerCase().includes(search.toLowerCase()) ||
-    complaint.location.toLowerCase().includes(search.toLowerCase());
+    const matchesSearch =
+      complaint.title?.toLowerCase().includes(search.toLowerCase()) ||
+      complaint.location?.toLowerCase().includes(search.toLowerCase());
 
-  const matchesCategory =
-    category === "All" ||
-    complaint.category === category;
+    const matchesCategory =
+      category === "All" || complaint.category === category;
 
-  return matchesSearch && matchesCategory;
-});
+    const matchesStatus = status === "All" || complaint.status === status;
+
+    return matchesSearch && matchesCategory && matchesStatus;
+  });
 
   return (
     <div className="min-h-screen bg-gray-100 p-8">
@@ -93,7 +95,7 @@ function AdminDashboard() {
         </div>
       </div>
 
-      <div className="flex flex-col md:flex-row gap-4 mb-6">
+      <div className="flex flex-col md:flex-row gap-4 mb-8">
         <input
           type="text"
           placeholder="Search by title or location..."
@@ -110,6 +112,19 @@ function AdminDashboard() {
           <option value="All">All Categories</option>
           <option value="Road">Road</option>
           <option value="Waste">Waste</option>
+        </select>
+
+        <select
+          value={status}
+          onChange={(e) => setStatus(e.target.value)}
+          className="p-3 border rounded-lg"
+        >
+          <option value="All">All Status</option>
+          <option value="Pending">Pending</option>
+          <option value="Under Review">Under Review</option>
+          <option value="Assigned">Assigned</option>
+          <option value="In Progress">In Progress</option>
+          <option value="Resolved">Resolved</option>
         </select>
       </div>
 
@@ -137,7 +152,7 @@ function AdminDashboard() {
 
                   <td className="p-4">
                     <select
-                      value={complaint.department}
+                      value={complaint.department || "Pending"}
                       onChange={(e) =>
                         handleDepartmentChange(complaint._id, e.target.value)
                       }
@@ -151,7 +166,7 @@ function AdminDashboard() {
 
                   <td className="p-4">
                     <select
-                      value={complaint.status}
+                      value={complaint.status || "Pending"}
                       onChange={(e) =>
                         handleStatusChange(complaint._id, e.target.value)
                       }
