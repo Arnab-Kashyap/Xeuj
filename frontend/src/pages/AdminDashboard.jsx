@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   getAllComplaints,
   assignDepartment,
@@ -6,6 +7,8 @@ import {
 } from "../services/complaintService";
 
 function AdminDashboard() {
+  const navigate = useNavigate();
+
   const [complaints, setComplaints] = useState([]);
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("All");
@@ -137,6 +140,7 @@ function AdminDashboard() {
               <th className="p-4 text-left">Location</th>
               <th className="p-4 text-left">Department</th>
               <th className="p-4 text-left">Status</th>
+              <th className="p-4 text-left">Actions</th>
             </tr>
           </thead>
 
@@ -179,11 +183,22 @@ function AdminDashboard() {
                       <option value="Resolved">Resolved</option>
                     </select>
                   </td>
+
+                  <td className="p-4">
+                    <button
+                      onClick={() =>
+                        navigate(`/admin/complaint/${complaint._id}`)
+                      }
+                      className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded"
+                    >
+                      View
+                    </button>
+                  </td>
                 </tr>
               ))
             ) : (
               <tr>
-                <td colSpan="5" className="text-center p-6 text-gray-500">
+                <td colSpan="6" className="text-center p-6 text-gray-500">
                   No complaints found.
                 </td>
               </tr>
