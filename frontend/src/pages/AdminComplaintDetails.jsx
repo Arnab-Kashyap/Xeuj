@@ -32,26 +32,49 @@ function AdminComplaintDetails() {
       <div className="max-w-4xl mx-auto bg-white rounded-xl shadow-lg p-8">
         <h1 className="text-3xl font-bold mb-6">Complaint Details</h1>
 
-        <div className="space-y-4">
-          <p><strong>Title:</strong> {complaint.title}</p>
-
-          <p><strong>Category:</strong> {complaint.category}</p>
-
-          <p><strong>Location:</strong> {complaint.location}</p>
-
-          <p><strong>Description:</strong> {complaint.description}</p>
-
-          <p><strong>Status:</strong> {complaint.status}</p>
-
-          <p><strong>Department:</strong> {complaint.department}</p>
-
+        <div className="space-y-5">
           {complaint.image && (
             <img
               src={complaint.image}
               alt="Complaint"
-              className="rounded-lg w-full max-h-96 object-cover"
+              className="w-full h-80 object-cover rounded-lg"
             />
           )}
+
+          <div>
+            <h3 className="font-semibold">Title</h3>
+            <p>{complaint.title}</p>
+          </div>
+
+          <div>
+            <h3 className="font-semibold">Description</h3>
+            <p>{complaint.description}</p>
+          </div>
+
+          <div>
+            <h3 className="font-semibold">Category</h3>
+            <p>{complaint.category}</p>
+          </div>
+
+          <div>
+            <h3 className="font-semibold">Location</h3>
+            <p>{complaint.location}</p>
+          </div>
+
+          <div>
+            <h3 className="font-semibold">Department</h3>
+            <p>{complaint.department}</p>
+          </div>
+
+          <div>
+            <h3 className="font-semibold">Status</h3>
+            <p>{complaint.status}</p>
+          </div>
+
+          <div>
+            <h3 className="font-semibold">Reported On</h3>
+            <p>{new Date(complaint.createdAt).toLocaleString()}</p>
+          </div>
         </div>
       </div>
     </div>
