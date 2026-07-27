@@ -4,8 +4,8 @@ import {
   getAllComplaints,
   assignDepartment,
   updateStatus,
+  deleteComplaint,
 } from "../services/complaintService";
-
 function AdminDashboard() {
   const navigate = useNavigate();
 
@@ -37,13 +37,28 @@ function AdminDashboard() {
   };
 
   const handleStatusChange = async (id, status) => {
-    try {
-      await updateStatus(id, status);
-      fetchComplaints();
-    } catch (error) {
-      console.log(error);
-    }
-  };
+  try {
+    await updateStatus(id, status);
+    fetchComplaints();
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+const handleDelete = async (id) => {
+  const confirmDelete = window.confirm(
+    "Are you sure you want to delete this complaint?"
+  );
+
+  if (!confirmDelete) return;
+
+  try {
+    await deleteComplaint(id);
+    fetchComplaints();
+  } catch (error) {
+    console.log(error);
+  }
+};
 
   const totalComplaints = complaints.length;
 
@@ -185,14 +200,23 @@ function AdminDashboard() {
                   </td>
 
                   <td className="p-4">
-                    <button
-                      onClick={() =>
-                        navigate(`/admin/complaint/${complaint._id}`)
-                      }
-                      className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded"
-                    >
-                      View
-                    </button>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() =>
+                          navigate(`/admin/complaint/${complaint._id}`)
+                        }
+                        className="bg-blue-600 text-white px-3 py-1 rounded"
+                      >
+                        View
+                      </button>
+
+                      <button
+                        onClick={() => handleDelete(complaint._id)}
+                        className="bg-red-600 text-white px-3 py-1 rounded"
+                      >   
+                        Delete
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))
