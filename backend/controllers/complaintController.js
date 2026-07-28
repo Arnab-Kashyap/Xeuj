@@ -37,6 +37,26 @@ export const getAllComplaints = async (req, res) => {
   }
 };
 
+export const getMyComplaints = async (req, res) => {
+  try {
+    const complaints = await Complaint.find({
+      user: req.params.userId,
+    }).sort({ createdAt: -1 });
+
+    res.status(200).json({
+      success: true,
+      complaints,
+    });
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
 export const getComplaintById = async (req, res) => {
   try {
     const complaint = await Complaint.findById(req.params.id).populate("user");
