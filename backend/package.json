@@ -2,6 +2,7 @@
   "name": "backend",
   "version": "1.0.0",
   "description": "Xeuj Backend API",
+  "type": "module",
   "main": "server.js",
   "scripts": {
     "dev": "nodemon server.js",
@@ -24,4 +25,5 @@
   "devDependencies": {
     "nodemon": "^3.1.14"
   }
+  
 }
