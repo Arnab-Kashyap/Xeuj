@@ -10,6 +10,10 @@ const complaintSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    complaintId: {
+      type: String,
+      unique: true,
+    },
     description: {
       type: String,
       required: true,
@@ -34,19 +38,13 @@ const complaintSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: [
-        "Pending",
-        "Under Review",
-        "Assigned",
-        "In Progress",
-        "Resolved",
-      ],
+      enum: ["Pending", "Under Review", "Assigned", "In Progress", "Resolved"],
       default: "Pending",
     },
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 export default mongoose.model("Complaint", complaintSchema);

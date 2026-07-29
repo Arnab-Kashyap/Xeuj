@@ -2,7 +2,24 @@ import Complaint from "../models/Complaint.js";
 
 export const createComplaint = async (req, res) => {
   try {
-    const complaint = await Complaint.create(req.body);
+    const lastComplaint = await Complaint.findOne().sort({ createdAt: -1 });
+
+    let nextNumber = 1;
+
+    if (lastComplaint && lastComplaint.complaintId) {
+      const lastNumber = parseInt(
+        lastComplaint.complaintId.split("-")[2]
+      );
+
+      nextNumber = lastNumber + 1;
+    }
+
+    const complaintId = `XEUJ-2026-${String(nextNumber).padStart(4, "0")}`;
+
+    const complaint = await Complaint.create({
+      ...req.body,
+      complaintId,
+    });
 
     res.status(201).json({
       success: true,

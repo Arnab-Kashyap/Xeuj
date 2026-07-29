@@ -21,28 +21,29 @@ function ReportIssue() {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    try {
-      const response = await createComplaint(formData);
+  try {
+    const response = await createComplaint(formData);
 
-      alert(response.message);
+    alert(
+      `Complaint submitted successfully!\n\nComplaint ID: ${response.complaint.complaintId}`
+    );
 
-      setFormData({
-        user: "",
-        title: "",
-        category: "Waste",
-        description: "",
-        location: "",
-        image: "",
-      });
-    } catch (error) {
-      console.log(error.response?.data);
-      console.log(error);
+    setFormData({
+      title: "",
+      category: "Waste",
+      description: "",
+      location: "",
+      image: "",
+    });
+  } catch (error) {
+    console.log(error.response?.data);
+    console.log(error);
 
-      alert(error.response?.data?.message || "Failed to submit complaint");
-    }
-  };
+    alert(error.response?.data?.message || "Failed to submit complaint");
+  }
+};
 
   return (
     <div className="min-h-screen bg-green-50 py-10 px-6">
