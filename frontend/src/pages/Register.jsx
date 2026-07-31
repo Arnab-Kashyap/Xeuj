@@ -1,4 +1,4 @@
-import { SignUp } from "@clerk/react";
+import { SignUp } from "@clerk/clerk-react";
 
 function Register() {
   return (
