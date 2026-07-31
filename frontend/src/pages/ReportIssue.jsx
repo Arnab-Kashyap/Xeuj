@@ -1,16 +1,19 @@
 import { useState } from "react";
+import { useUser } from "@clerk/clerk-react";
 import Input from "../components/Input";
 import { createComplaint } from "../services/complaintService";
 
 function ReportIssue() {
- const [formData, setFormData] = useState({
-  title: "",
-  category: "Waste",
-  description: "",
-  location: "",
-  image: "",
-});
- 
+  const { user } = useUser();
+  const [formData, setFormData] = useState({
+    clerkId: "",
+    title: "",
+    category: "Waste",
+    description: "",
+    location: "",
+    image: "",
+  });
+
   const handleChange = (e) => {
     const { name, value } = e.target;
 
@@ -21,29 +24,32 @@ function ReportIssue() {
   };
 
   const handleSubmit = async (e) => {
-  e.preventDefault();
+    e.preventDefault();
+    const complaintData = {
+      ...formData,
+      clerkId: user.id,
+    };
+    try {
+      const response = await createComplaint(complaintData);
 
-  try {
-    const response = await createComplaint(formData);
+      alert(
+        `Complaint submitted successfully!\n\nComplaint ID: ${response.complaint.complaintId}`,
+      );
 
-    alert(
-      `Complaint submitted successfully!\n\nComplaint ID: ${response.complaint.complaintId}`
-    );
+      setFormData({
+        title: "",
+        category: "Waste",
+        description: "",
+        location: "",
+        image: "",
+      });
+    } catch (error) {
+      console.log(error.response?.data);
+      console.log(error);
 
-    setFormData({
-      title: "",
-      category: "Waste",
-      description: "",
-      location: "",
-      image: "",
-    });
-  } catch (error) {
-    console.log(error.response?.data);
-    console.log(error);
-
-    alert(error.response?.data?.message || "Failed to submit complaint");
-  }
-};
+      alert(error.response?.data?.message || "Failed to submit complaint");
+    }
+  };
 
   return (
     <div className="min-h-screen bg-green-50 py-10 px-6">

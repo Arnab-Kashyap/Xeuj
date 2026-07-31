@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { SignedIn, SignedOut, UserButton } from "@clerk/clerk-react";
 import Logo from "./Logo";
 import NavLinks from "./NavLinks";
 
@@ -13,12 +14,29 @@ function Navbar() {
           <NavLinks />
         </div>
 
-        <Link
-          to="/login"
-          className="bg-green-700 text-white px-5 py-2 rounded-full font-medium hover:bg-green-800 transition"
-        >
-          Get Started
-        </Link>
+        <div className="flex items-center gap-4">
+
+          <SignedOut>
+            <Link
+              to="/login"
+              className="bg-green-700 text-white px-5 py-2 rounded-full font-medium hover:bg-green-800 transition"
+            >
+              Get Started
+            </Link>
+          </SignedOut>
+
+          <SignedIn>
+            <UserButton
+              afterSignOutUrl="/"
+              appearance={{
+                elements: {
+                  avatarBox: "w-10 h-10",
+                },
+              }}
+            />
+          </SignedIn>
+
+        </div>
 
       </div>
     </nav>
