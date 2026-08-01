@@ -57,7 +57,7 @@ export const getAllComplaints = async (req, res) => {
 export const getMyComplaints = async (req, res) => {
   try {
     const complaints = await Complaint.find({
-      user: req.params.userId,
+      clerkId: req.params.clerkId,
     }).sort({ createdAt: -1 });
 
     res.status(200).json({
