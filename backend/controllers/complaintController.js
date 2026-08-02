@@ -7,9 +7,7 @@ export const createComplaint = async (req, res) => {
     let nextNumber = 1;
 
     if (lastComplaint && lastComplaint.complaintId) {
-      const lastNumber = parseInt(
-        lastComplaint.complaintId.split("-")[2]
-      );
+      const lastNumber = parseInt(lastComplaint.complaintId.split("-")[2]);
 
       nextNumber = lastNumber + 1;
     }
@@ -19,6 +17,12 @@ export const createComplaint = async (req, res) => {
     const complaint = await Complaint.create({
       ...req.body,
       complaintId,
+
+      timeline: [
+        {
+          status: "Pending",
+        },
+      ],
     });
 
     res.status(201).json({
@@ -38,7 +42,7 @@ export const createComplaint = async (req, res) => {
 
 export const getAllComplaints = async (req, res) => {
   try {
-    const complaints = await Complaint.find().populate("user");
+    const complaints = await Complaint.find();
 
     res.status(200).json({
       success: true,
@@ -76,7 +80,7 @@ export const getMyComplaints = async (req, res) => {
 
 export const getComplaintById = async (req, res) => {
   try {
-    const complaint = await Complaint.findById(req.params.id).populate("user");
+    const complaint = await Complaint.findById(req.params.id);
 
     if (!complaint) {
       return res.status(404).json({
@@ -101,15 +105,7 @@ export const getComplaintById = async (req, res) => {
 
 export const assignDepartment = async (req, res) => {
   try {
-    const complaint = await Complaint.findByIdAndUpdate(
-      req.params.id,
-      {
-        department: req.body.department,
-      },
-      {
-        new: true,
-      }
-    );
+    const complaint = await Complaint.findById(req.params.id);
 
     if (!complaint) {
       return res.status(404).json({
@@ -117,6 +113,10 @@ export const assignDepartment = async (req, res) => {
         message: "Complaint not found",
       });
     }
+
+    complaint.department = req.body.department;
+
+    await complaint.save();
 
     res.status(200).json({
       success: true,
@@ -135,15 +135,7 @@ export const assignDepartment = async (req, res) => {
 
 export const updateComplaintStatus = async (req, res) => {
   try {
-    const complaint = await Complaint.findByIdAndUpdate(
-      req.params.id,
-      {
-        status: req.body.status,
-      },
-      {
-        new: true,
-      }
-    );
+    const complaint = await Complaint.findById(req.params.id);
 
     if (!complaint) {
       return res.status(404).json({
@@ -151,6 +143,15 @@ export const updateComplaintStatus = async (req, res) => {
         message: "Complaint not found",
       });
     }
+
+    complaint.status = req.body.status;
+
+    complaint.timeline.push({
+      status: req.body.status,
+      updatedAt: new Date(),
+    });
+
+    await complaint.save();
 
     res.status(200).json({
       success: true,
