@@ -11,6 +11,7 @@ import Contact from "../pages/Contact";
 import AdminLogin from "../pages/AdminLogin";
 import AdminDashboard from "../pages/AdminDashboard";
 import AdminComplaintDetails from "../pages/AdminComplaintDetails";
+import ComplaintDetails from "../pages/ComplaintDetails";
 
 function AppRouter() {
   return (
@@ -22,6 +23,7 @@ function AppRouter() {
           path="/admin/complaint/:id"
           element={<AdminComplaintDetails />}
         />
+        <Route path="/complaints/:id" element={<ComplaintDetails />} />
 
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />

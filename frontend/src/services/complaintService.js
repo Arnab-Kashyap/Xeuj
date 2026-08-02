@@ -12,36 +12,38 @@ export const getAllComplaints = async () => {
   return response.data;
 };
 
+export const getMyComplaints = async (clerkId) => {
+  const response = await axios.get(`${API}/my/${clerkId}`);
+  return response.data;
+};
+
 export const getComplaintById = async (id) => {
   const response = await axios.get(`${API}/${id}`);
   return response.data;
 };
- export const deleteComplaint = async (id) => {
-  const response = await axios.delete(`${API}/${id}`);
-  return response.data;
-};  
+
 export const trackComplaint = async (id) => {
   const response = await axios.get(`${API}/${id}`);
   return response.data;
 };
+
 export const assignDepartment = async (id, department) => {
-  const response = await axios.put(
-    `${API}/${id}/department`,
-    {
-      department,
-    }
-  );
+  const response = await axios.put(`${API}/${id}/department`, {
+    department,
+  });
 
   return response.data;
 };
 
 export const updateStatus = async (id, status) => {
-  const response = await axios.put(
-    `${API}/${id}/status`,
-    {
-      status,
-    }
-  );
+  const response = await axios.put(`${API}/${id}/status`, {
+    status,
+  });
 
+  return response.data;
+};
+
+export const deleteComplaint = async (id) => {
+  const response = await axios.delete(`${API}/${id}`);
   return response.data;
 };
