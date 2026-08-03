@@ -1,10 +1,11 @@
 import express from "express";
+import upload from "../middleware/upload.js";
 
 import {
   createComplaint,
   getAllComplaints,
-  getMyComplaints,
   getComplaintById,
+  getMyComplaints,
   assignDepartment,
   updateComplaintStatus,
   deleteComplaint,
@@ -12,11 +13,11 @@ import {
 
 const router = express.Router();
 
-router.post("/", createComplaint);
+router.post("/", upload.single("image"), createComplaint);
 
 router.get("/", getAllComplaints);
 
-router.get("/my/:clerkId", getMyComplaints);
+router.get("/user/:clerkId", getMyComplaints);
 
 router.get("/:id", getComplaintById);
 
