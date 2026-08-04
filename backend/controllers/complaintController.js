@@ -1,4 +1,5 @@
 import Complaint from "../models/Complaint.js";
+import cloudinary from "../config/cloudinary.js";
 
 export const createComplaint = async (req, res) => {
   try {
@@ -14,9 +15,30 @@ export const createComplaint = async (req, res) => {
 
     const complaintId = `XEUJ-2026-${String(nextNumber).padStart(4, "0")}`;
 
+    let imageUrl = "";
+
+    if (req.file) {
+      const uploadedImage = await new Promise((resolve, reject) => {
+        cloudinary.uploader
+          .upload_stream(
+            {
+              folder: "xeuj-complaints",
+            },
+            (error, result) => {
+              if (error) reject(error);
+              else resolve(result);
+            }
+          )
+          .end(req.file.buffer);
+      });
+
+      imageUrl = uploadedImage.secure_url;
+    }
+
     const complaint = await Complaint.create({
       ...req.body,
       complaintId,
+      image: imageUrl,
 
       timeline: [
         {
@@ -49,8 +71,6 @@ export const getAllComplaints = async (req, res) => {
       complaints,
     });
   } catch (error) {
-    console.error(error);
-
     res.status(500).json({
       success: false,
       message: error.message,
@@ -69,8 +89,6 @@ export const getMyComplaints = async (req, res) => {
       complaints,
     });
   } catch (error) {
-    console.error(error);
-
     res.status(500).json({
       success: false,
       message: error.message,
@@ -94,8 +112,6 @@ export const getComplaintById = async (req, res) => {
       complaint,
     });
   } catch (error) {
-    console.error(error);
-
     res.status(500).json({
       success: false,
       message: error.message,
@@ -124,8 +140,6 @@ export const assignDepartment = async (req, res) => {
       complaint,
     });
   } catch (error) {
-    console.error(error);
-
     res.status(500).json({
       success: false,
       message: error.message,
@@ -159,8 +173,6 @@ export const updateComplaintStatus = async (req, res) => {
       complaint,
     });
   } catch (error) {
-    console.error(error);
-
     res.status(500).json({
       success: false,
       message: error.message,
@@ -184,8 +196,6 @@ export const deleteComplaint = async (req, res) => {
       message: "Complaint deleted successfully",
     });
   } catch (error) {
-    console.error(error);
-
     res.status(500).json({
       success: false,
       message: error.message,
