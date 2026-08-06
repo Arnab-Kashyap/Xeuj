@@ -52,7 +52,7 @@ function TrackComplaint() {
             </p>
           </div>
         ) : (
-          <div className="space-y-5">
+          <div className="space-y-6">
             {complaints.map((complaint) => (
               <div
                 key={complaint._id}
@@ -75,7 +75,7 @@ function TrackComplaint() {
                       {complaint.category}
                     </p>
 
-                    <p>
+                    <p className="mt-1">
                       <span className="font-medium">
                         Location:
                       </span>{" "}
@@ -83,10 +83,32 @@ function TrackComplaint() {
                     </p>
                   </div>
 
-                  <span className="bg-yellow-100 text-yellow-700 px-4 py-2 rounded-full font-medium">
+                  <span
+                    className={`px-4 py-2 rounded-full font-medium ${
+                      complaint.status === "Resolved"
+                        ? "bg-green-100 text-green-700"
+                        : complaint.status === "In Progress"
+                        ? "bg-blue-100 text-blue-700"
+                        : complaint.status === "Assigned"
+                        ? "bg-purple-100 text-purple-700"
+                        : complaint.status === "Under Review"
+                        ? "bg-orange-100 text-orange-700"
+                        : "bg-yellow-100 text-yellow-700"
+                    }`}
+                  >
                     {complaint.status}
                   </span>
                 </div>
+
+                {complaint.image && (
+                  <div className="mt-5">
+                    <img
+                      src={complaint.image}
+                      alt={complaint.title}
+                      className="w-full h-64 object-cover rounded-xl border"
+                    />
+                  </div>
+                )}
 
                 <Link
                   to={`/complaints/${complaint._id}`}
