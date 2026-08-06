@@ -28,7 +28,7 @@ function ReportIssue() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+    console.count("handleSubmit");
     const data = new FormData();
 
     data.append("clerkId", user.id);
