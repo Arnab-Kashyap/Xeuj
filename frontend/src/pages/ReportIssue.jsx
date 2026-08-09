@@ -57,8 +57,8 @@ function ReportIssue() {
 
       const response = await fetch(
         `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
-          value
-        )}&limit=5&addressdetails=1`
+          value,
+        )}&limit=5&addressdetails=1`,
       );
 
       const data = await response.json();
@@ -112,7 +112,7 @@ function ReportIssue() {
 
         try {
           const response = await fetch(
-            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`
+            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`,
           );
 
           const data = await response.json();
@@ -140,7 +140,7 @@ function ReportIssue() {
 
         if (error.code === 1) {
           alert(
-            "Location permission was denied. Please allow location access."
+            "Location permission was denied. Please allow location access.",
           );
         } else if (error.code === 2) {
           alert("Unable to detect your location.");
@@ -155,7 +155,7 @@ function ReportIssue() {
         enableHighAccuracy: true,
         timeout: 10000,
         maximumAge: 0,
-      }
+      },
     );
   };
 
@@ -180,7 +180,7 @@ function ReportIssue() {
       JSON.stringify({
         lat: coordinates.lat,
         lng: coordinates.lng,
-      })
+      }),
     );
 
     if (image) {
@@ -191,7 +191,7 @@ function ReportIssue() {
       const response = await createComplaint(data);
 
       alert(
-        `Complaint submitted successfully!\n\nComplaint ID: ${response.complaint.complaintId}`
+        `Complaint submitted successfully!\n\nComplaint ID: ${response.complaint.complaintId}`,
       );
 
       setFormData({
@@ -211,28 +211,19 @@ function ReportIssue() {
     } catch (error) {
       console.error(error);
 
-      alert(
-        error.response?.data?.message ||
-          "Failed to submit complaint"
-      );
+      alert(error.response?.data?.message || "Failed to submit complaint");
     }
   };
 
   return (
     <div className="min-h-screen bg-green-50 py-10 px-6">
       <div className="max-w-2xl mx-auto bg-white p-8 rounded-2xl shadow-sm">
-
-        <h1 className="text-3xl font-bold mb-6">
-          Report an Issue
-        </h1>
+        <h1 className="text-3xl font-bold mb-6">Report an Issue</h1>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-
           {/* TITLE */}
           <div>
-            <label className="block mb-2 font-medium">
-              Issue Title
-            </label>
+            <label className="block mb-2 font-medium">Issue Title</label>
 
             <Input
               type="text"
@@ -243,11 +234,8 @@ function ReportIssue() {
             />
           </div>
 
-          {/* CATEGORY */}
           <div>
-            <label className="block mb-2 font-medium">
-              Issue Type
-            </label>
+            <label className="block mb-2 font-medium">Issue Type</label>
 
             <select
               name="category"
@@ -260,11 +248,8 @@ function ReportIssue() {
             </select>
           </div>
 
-          {/* DESCRIPTION */}
           <div>
-            <label className="block mb-2 font-medium">
-              Description
-            </label>
+            <label className="block mb-2 font-medium">Description</label>
 
             <textarea
               rows="4"
@@ -276,14 +261,10 @@ function ReportIssue() {
             />
           </div>
 
-          {/* LOCATION */}
           <div>
-            <label className="block mb-2 font-medium">
-              Location
-            </label>
+            <label className="block mb-2 font-medium">Location</label>
 
             <div className="relative">
-
               <Input
                 type="text"
                 name="location"
@@ -292,28 +273,20 @@ function ReportIssue() {
                 placeholder="Search for a location..."
               />
 
-              {/* SEARCH RESULTS */}
               {searchResults.length > 0 && (
                 <div className="absolute z-[1000] w-full bg-white border rounded-lg shadow-lg mt-1">
-
                   {searchResults.map((result) => (
                     <button
                       type="button"
                       key={result.place_id}
-                      onClick={() =>
-                        handleSelectLocation(result)
-                      }
+                      onClick={() => handleSelectLocation(result)}
                       className="block w-full text-left px-4 py-3 hover:bg-green-50 border-b last:border-b-0"
                     >
-                      <p className="text-sm">
-                        {result.display_name}
-                      </p>
+                      <p className="text-sm">{result.display_name}</p>
                     </button>
                   ))}
-
                 </div>
               )}
-
             </div>
 
             {searchLoading && (
@@ -322,7 +295,6 @@ function ReportIssue() {
               </p>
             )}
 
-            {/* CURRENT LOCATION */}
             <button
               type="button"
               onClick={handleCurrentLocation}
@@ -334,32 +306,28 @@ function ReportIssue() {
                 : "📍 Use Current Location"}
             </button>
 
-            {/* MAP */}
             <div className="mt-4">
               <LocationMap
                 latitude={coordinates.lat}
                 longitude={coordinates.lng}
+                onLocationChange={(lat, lng) => {
+                  setCoordinates({
+                    lat,
+                    lng,
+                  });
+                }}
               />
             </div>
 
-            {/* COORDINATES */}
             <div className="mt-3 text-sm text-gray-500">
-              <p>
-                Latitude: {coordinates.lat}
-              </p>
+              <p>Latitude: {coordinates.lat}</p>
 
-              <p>
-                Longitude: {coordinates.lng}
-              </p>
+              <p>Longitude: {coordinates.lng}</p>
             </div>
-
           </div>
 
-          {/* IMAGE */}
           <div>
-            <label className="block mb-2 font-medium">
-              Upload Image
-            </label>
+            <label className="block mb-2 font-medium">Upload Image</label>
 
             <input
               type="file"
@@ -369,16 +337,13 @@ function ReportIssue() {
             />
           </div>
 
-          {/* SUBMIT */}
           <button
             type="submit"
             className="w-full bg-green-700 text-white py-3 rounded-lg hover:bg-green-800 transition"
           >
             Submit Report
           </button>
-
         </form>
-
       </div>
     </div>
   );

@@ -4,6 +4,7 @@ import {
   Marker,
   Popup,
   useMap,
+  useMapEvents,
 } from "react-leaflet";
 
 import "leaflet/dist/leaflet.css";
@@ -24,7 +25,8 @@ L.Icon.Default.mergeOptions({
     "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png",
 });
 
-// Moves the map whenever coordinates change
+
+// Move map when coordinates change
 function MapUpdater({ latitude, longitude }) {
   const map = useMap();
 
@@ -35,7 +37,75 @@ function MapUpdater({ latitude, longitude }) {
   return null;
 }
 
-function LocationMap({ latitude, longitude }) {
+
+// Handle clicking on map
+function MapClickHandler({ onLocationChange }) {
+  useMapEvents({
+    click(e) {
+      onLocationChange(
+        e.latlng.lat,
+        e.latlng.lng
+      );
+    },
+  });
+
+  return null;
+}
+
+
+// Draggable marker
+function DraggableMarker({
+  latitude,
+  longitude,
+  onLocationChange,
+}) {
+  const eventHandlers = {
+    dragend(e) {
+      const marker = e.target;
+      const position = marker.getLatLng();
+
+      onLocationChange(
+        position.lat,
+        position.lng
+      );
+    },
+  };
+
+  return (
+    <Marker
+      position={[latitude, longitude]}
+      draggable={true}
+      eventHandlers={eventHandlers}
+    >
+      <Popup>
+        <div>
+          <strong>Complaint Location</strong>
+
+          <br />
+
+          Drag this marker to the exact location.
+
+          <br />
+
+          <br />
+
+          Latitude: {latitude}
+
+          <br />
+
+          Longitude: {longitude}
+        </div>
+      </Popup>
+    </Marker>
+  );
+}
+
+
+function LocationMap({
+  latitude,
+  longitude,
+  onLocationChange,
+}) {
   return (
     <div className="w-full h-80 rounded-xl overflow-hidden border">
       <MapContainer
@@ -44,8 +114,9 @@ function LocationMap({ latitude, longitude }) {
         scrollWheelZoom={true}
         className="w-full h-full"
       >
+
         <TileLayer
-          attribution='&copy; OpenStreetMap contributors'
+          attribution="&copy; OpenStreetMap contributors"
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
 
@@ -54,17 +125,16 @@ function LocationMap({ latitude, longitude }) {
           longitude={longitude}
         />
 
-        <Marker position={[latitude, longitude]}>
-          <Popup>
-            <div>
-              <strong>Complaint Location</strong>
-              <br />
-              Latitude: {latitude}
-              <br />
-              Longitude: {longitude}
-            </div>
-          </Popup>
-        </Marker>
+        <MapClickHandler
+          onLocationChange={onLocationChange}
+        />
+
+        <DraggableMarker
+          latitude={latitude}
+          longitude={longitude}
+          onLocationChange={onLocationChange}
+        />
+
       </MapContainer>
     </div>
   );
