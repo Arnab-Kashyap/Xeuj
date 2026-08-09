@@ -23,6 +23,10 @@ function ReportIssue() {
 
   const [locationLoading, setLocationLoading] = useState(false);
 
+  const [searchResults, setSearchResults] = useState([]);
+
+  const [searchLoading, setSearchLoading] = useState(false);
+
   const handleChange = (e) => {
     setFormData({
       ...formData,
@@ -34,6 +38,58 @@ function ReportIssue() {
     setImage(e.target.files[0]);
   };
 
+  // Search location
+  const handleLocationSearch = async (e) => {
+    const value = e.target.value;
+
+    setFormData((prev) => ({
+      ...prev,
+      location: value,
+    }));
+
+    if (value.length < 3) {
+      setSearchResults([]);
+      return;
+    }
+
+    try {
+      setSearchLoading(true);
+
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
+          value
+        )}&limit=5&addressdetails=1`
+      );
+
+      const data = await response.json();
+
+      setSearchResults(data);
+    } catch (error) {
+      console.error("Location search error:", error);
+    } finally {
+      setSearchLoading(false);
+    }
+  };
+
+  // Select searched location
+  const handleSelectLocation = (result) => {
+    const lat = parseFloat(result.lat);
+    const lng = parseFloat(result.lon);
+
+    setCoordinates({
+      lat,
+      lng,
+    });
+
+    setFormData((prev) => ({
+      ...prev,
+      location: result.display_name,
+    }));
+
+    setSearchResults([]);
+  };
+
+  // Detect current location
   const handleCurrentLocation = () => {
     if (!navigator.geolocation) {
       alert("Geolocation is not supported by your browser.");
@@ -60,8 +116,6 @@ function ReportIssue() {
           );
 
           const data = await response.json();
-
-          console.log("Location data:", data);
 
           setFormData((prev) => ({
             ...prev,
@@ -108,6 +162,11 @@ function ReportIssue() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    if (!formData.location) {
+      alert("Please select or detect a location.");
+      return;
+    }
+
     const data = new FormData();
 
     data.append("clerkId", user.id);
@@ -116,7 +175,6 @@ function ReportIssue() {
     data.append("description", formData.description);
     data.append("location", formData.location);
 
-    // Send coordinates
     data.append(
       "coordinates",
       JSON.stringify({
@@ -149,6 +207,7 @@ function ReportIssue() {
       });
 
       setImage(null);
+      setSearchResults([]);
     } catch (error) {
       console.error(error);
 
@@ -169,7 +228,7 @@ function ReportIssue() {
 
         <form onSubmit={handleSubmit} className="space-y-4">
 
-          {/* Title */}
+          {/* TITLE */}
           <div>
             <label className="block mb-2 font-medium">
               Issue Title
@@ -184,7 +243,7 @@ function ReportIssue() {
             />
           </div>
 
-          {/* Category */}
+          {/* CATEGORY */}
           <div>
             <label className="block mb-2 font-medium">
               Issue Type
@@ -201,7 +260,7 @@ function ReportIssue() {
             </select>
           </div>
 
-          {/* Description */}
+          {/* DESCRIPTION */}
           <div>
             <label className="block mb-2 font-medium">
               Description
@@ -217,20 +276,53 @@ function ReportIssue() {
             />
           </div>
 
-          {/* Location */}
+          {/* LOCATION */}
           <div>
             <label className="block mb-2 font-medium">
               Location
             </label>
 
-            <Input
-              type="text"
-              name="location"
-              value={formData.location}
-              onChange={handleChange}
-              placeholder="Enter location or use current location"
-            />
+            <div className="relative">
 
+              <Input
+                type="text"
+                name="location"
+                value={formData.location}
+                onChange={handleLocationSearch}
+                placeholder="Search for a location..."
+              />
+
+              {/* SEARCH RESULTS */}
+              {searchResults.length > 0 && (
+                <div className="absolute z-[1000] w-full bg-white border rounded-lg shadow-lg mt-1">
+
+                  {searchResults.map((result) => (
+                    <button
+                      type="button"
+                      key={result.place_id}
+                      onClick={() =>
+                        handleSelectLocation(result)
+                      }
+                      className="block w-full text-left px-4 py-3 hover:bg-green-50 border-b last:border-b-0"
+                    >
+                      <p className="text-sm">
+                        {result.display_name}
+                      </p>
+                    </button>
+                  ))}
+
+                </div>
+              )}
+
+            </div>
+
+            {searchLoading && (
+              <p className="text-sm text-gray-500 mt-2">
+                Searching locations...
+              </p>
+            )}
+
+            {/* CURRENT LOCATION */}
             <button
               type="button"
               onClick={handleCurrentLocation}
@@ -242,6 +334,7 @@ function ReportIssue() {
                 : "📍 Use Current Location"}
             </button>
 
+            {/* MAP */}
             <div className="mt-4">
               <LocationMap
                 latitude={coordinates.lat}
@@ -249,6 +342,7 @@ function ReportIssue() {
               />
             </div>
 
+            {/* COORDINATES */}
             <div className="mt-3 text-sm text-gray-500">
               <p>
                 Latitude: {coordinates.lat}
@@ -258,9 +352,10 @@ function ReportIssue() {
                 Longitude: {coordinates.lng}
               </p>
             </div>
+
           </div>
 
-          {/* Image */}
+          {/* IMAGE */}
           <div>
             <label className="block mb-2 font-medium">
               Upload Image
@@ -274,7 +369,7 @@ function ReportIssue() {
             />
           </div>
 
-          {/* Submit */}
+          {/* SUBMIT */}
           <button
             type="submit"
             className="w-full bg-green-700 text-white py-3 rounded-lg hover:bg-green-800 transition"

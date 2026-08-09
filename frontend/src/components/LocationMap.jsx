@@ -3,38 +3,70 @@ import {
   TileLayer,
   Marker,
   Popup,
+  useMap,
 } from "react-leaflet";
 
 import "leaflet/dist/leaflet.css";
+import L from "leaflet";
+import { useEffect } from "react";
 
-function LocationMap({
-  latitude = 26.1445,
-  longitude = 91.7362,
-}) {
-  const position = [latitude, longitude];
+// Fix Leaflet marker icon
+delete L.Icon.Default.prototype._getIconUrl;
 
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl:
+    "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png",
+
+  iconUrl:
+    "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png",
+
+  shadowUrl:
+    "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png",
+});
+
+// Moves the map whenever coordinates change
+function MapUpdater({ latitude, longitude }) {
+  const map = useMap();
+
+  useEffect(() => {
+    map.setView([latitude, longitude], 16);
+  }, [latitude, longitude, map]);
+
+  return null;
+}
+
+function LocationMap({ latitude, longitude }) {
   return (
-    <MapContainer
-      center={position}
-      zoom={13}
-      scrollWheelZoom={true}
-      style={{
-        height: "320px",
-        width: "100%",
-        borderRadius: "12px",
-      }}
-    >
-      <TileLayer
-        attribution="&copy; OpenStreetMap contributors"
-        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-      />
+    <div className="w-full h-80 rounded-xl overflow-hidden border">
+      <MapContainer
+        center={[latitude, longitude]}
+        zoom={16}
+        scrollWheelZoom={true}
+        className="w-full h-full"
+      >
+        <TileLayer
+          attribution='&copy; OpenStreetMap contributors'
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        />
 
-      <Marker position={position}>
-        <Popup>
-          Selected Location
-        </Popup>
-      </Marker>
-    </MapContainer>
+        <MapUpdater
+          latitude={latitude}
+          longitude={longitude}
+        />
+
+        <Marker position={[latitude, longitude]}>
+          <Popup>
+            <div>
+              <strong>Complaint Location</strong>
+              <br />
+              Latitude: {latitude}
+              <br />
+              Longitude: {longitude}
+            </div>
+          </Popup>
+        </Marker>
+      </MapContainer>
+    </div>
   );
 }
 
