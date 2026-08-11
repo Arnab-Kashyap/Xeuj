@@ -55,6 +55,8 @@ async function getLocationName(latitude, longitude) {
 function MapClickHandler({ onLocationChange }) {
   useMapEvents({
     async click(e) {
+      if (!onLocationChange) return;
+
       const latitude = e.latlng.lat;
       const longitude = e.latlng.lng;
 
@@ -78,20 +80,17 @@ function DraggableMarker({
   latitude,
   longitude,
   onLocationChange,
+  readOnly,
 }) {
   const eventHandlers = {
     async dragend(e) {
+      if (readOnly || !onLocationChange) return;
+
       const marker = e.target;
       const position = marker.getLatLng();
 
       const newLatitude = position.lat;
       const newLongitude = position.lng;
-
-      console.log(
-        "Marker moved:",
-        newLatitude,
-        newLongitude
-      );
 
       const locationName = await getLocationName(
         newLatitude,
@@ -109,18 +108,26 @@ function DraggableMarker({
   return (
     <Marker
       position={[latitude, longitude]}
-      draggable={true}
+      draggable={!readOnly}
       eventHandlers={eventHandlers}
     >
       <Popup>
         <strong>Complaint Location</strong>
+
         <br />
         <br />
-        Drag this marker to the exact location.
+
+        {readOnly
+          ? "This is the reported complaint location."
+          : "Drag this marker to the exact location."}
+
         <br />
         <br />
+
         Latitude: {latitude}
+
         <br />
+
         Longitude: {longitude}
       </Popup>
     </Marker>
@@ -131,6 +138,7 @@ function LocationMap({
   latitude,
   longitude,
   onLocationChange,
+  readOnly = false,
 }) {
   return (
     <div className="w-full h-[320px] rounded-xl overflow-hidden border">
@@ -150,14 +158,17 @@ function LocationMap({
           longitude={longitude}
         />
 
-        <MapClickHandler
-          onLocationChange={onLocationChange}
-        />
+        {!readOnly && (
+          <MapClickHandler
+            onLocationChange={onLocationChange}
+          />
+        )}
 
         <DraggableMarker
           latitude={latitude}
           longitude={longitude}
           onLocationChange={onLocationChange}
+          readOnly={readOnly}
         />
       </MapContainer>
     </div>
