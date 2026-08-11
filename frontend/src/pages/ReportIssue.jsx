@@ -89,12 +89,45 @@ function ReportIssue() {
     setSearchResults([]);
   };
 
-  // Detect current location
   const handleCurrentLocation = () => {
     if (!navigator.geolocation) {
       alert("Geolocation is not supported by your browser.");
       return;
     }
+
+    const handleMapLocationChange = async (lat, lng) => {
+  console.log("Map location changed:", lat, lng);
+
+
+  setCoordinates({
+    lat,
+    lng,
+  });
+
+  try {
+    const response = await fetch(
+      `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`
+    );
+
+    const data = await response.json();
+
+    console.log("Selected location:", data);
+
+    setFormData((prev) => ({
+      ...prev,
+      location:
+        data.display_name ||
+        `${lat.toFixed(6)}, ${lng.toFixed(6)}`,
+    }));
+  } catch (error) {
+    console.error("Reverse geocoding failed:", error);
+
+    setFormData((prev) => ({
+      ...prev,
+      location: `${lat.toFixed(6)}, ${lng.toFixed(6)}`,
+    }));
+  }
+};
 
     setLocationLoading(true);
 
@@ -310,11 +343,16 @@ function ReportIssue() {
               <LocationMap
                 latitude={coordinates.lat}
                 longitude={coordinates.lng}
-                onLocationChange={(lat, lng) => {
+                onLocationChange={(lat, lng, locationName) => {
                   setCoordinates({
                     lat,
                     lng,
                   });
+
+                  setFormData((prev) => ({
+                    ...prev,
+                    location: locationName,
+                  }));
                 }}
               />
             </div>
