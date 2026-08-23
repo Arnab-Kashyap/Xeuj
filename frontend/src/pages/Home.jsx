@@ -4,11 +4,14 @@ import Features from "../sections/Features";
 
 function Home() {
   return (
-    <>
+    <div className="min-h-screen bg-green-50">
       <Navbar />
-      <Hero />
-      <Features />
-    </>
+
+      <main>
+        <Hero />
+        <Features />
+      </main>
+    </div>
   );
 }
 
