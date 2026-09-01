@@ -9,6 +9,7 @@ import {
   assignDepartment,
   updateComplaintStatus,
   deleteComplaint,
+  getComplaintAnalytics,
 } from "../controllers/complaintController.js";
 
 const router = express.Router();
@@ -16,6 +17,8 @@ const router = express.Router();
 router.post("/", upload.single("image"), createComplaint);
 
 router.get("/", getAllComplaints);
+
+router.get("/analytics", getComplaintAnalytics);
 
 router.get("/user/:clerkId", getMyComplaints);
 

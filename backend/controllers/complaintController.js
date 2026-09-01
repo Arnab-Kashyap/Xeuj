@@ -280,6 +280,61 @@ export const assignDepartment = async (
     });
   }
 };
+export const getComplaintAnalytics = async (req, res) => {
+  try {
+    const total = await Complaint.countDocuments();
+
+    const road = await Complaint.countDocuments({
+      category: "Road",
+    });
+
+    const waste = await Complaint.countDocuments({
+      category: "Waste",
+    });
+
+    const pending = await Complaint.countDocuments({
+      status: "Pending",
+    });
+
+    const resolved = await Complaint.countDocuments({
+      status: "Resolved",
+    });
+
+    const complaints = await Complaint.find(
+      {
+        "coordinates.latitude": { $ne: null },
+        "coordinates.longitude": { $ne: null },
+      },
+      {
+        complaintId: 1,
+        title: 1,
+        category: 1,
+        status: 1,
+        location: 1,
+        coordinates: 1,
+      }
+    ).lean();
+
+    res.status(200).json({
+      success: true,
+      analytics: {
+        total,
+        road,
+        waste,
+        pending,
+        resolved,
+        complaints,
+      },
+    });
+  } catch (error) {
+    console.error("Analytics error:", error);
+
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch complaint analytics",
+    });
+  }
+};
 
 export const updateComplaintStatus = async (
   req,
