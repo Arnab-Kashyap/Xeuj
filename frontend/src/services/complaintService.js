@@ -17,6 +17,11 @@ export const getAllComplaints = async () => {
   return response.data;
 };
 
+export const getComplaintAnalytics = async () => {
+  const response = await axios.get(`${API}/analytics`);
+  return response.data;
+};
+
 export const getComplaintById = async (id) => {
   const response = await axios.get(`${API}/${id}`);
   return response.data;
