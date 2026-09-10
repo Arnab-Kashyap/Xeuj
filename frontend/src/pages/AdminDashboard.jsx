@@ -1,6 +1,18 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import ComplaintHeatmap from "../components/ComplaintHeatmap";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Legend,
+} from "recharts";
 
 import {
   getComplaintAnalytics,
@@ -76,7 +88,24 @@ function AdminDashboard() {
       console.log(error);
     }
   };
+  const statusCounts = {
+    pending: complaints.filter((complaint) => complaint.status === "Pending")
+      .length,
 
+    underReview: complaints.filter(
+      (complaint) => complaint.status === "Under Review",
+    ).length,
+
+    assigned: complaints.filter((complaint) => complaint.status === "Assigned")
+      .length,
+
+    inProgress: complaints.filter(
+      (complaint) => complaint.status === "In Progress",
+    ).length,
+
+    resolved: complaints.filter((complaint) => complaint.status === "Resolved")
+      .length,
+  };
   const filteredComplaints = complaints.filter((complaint) => {
     const matchesSearch =
       complaint.title?.toLowerCase().includes(search.toLowerCase()) ||
@@ -98,6 +127,95 @@ function AdminDashboard() {
         <div className="bg-white p-5 rounded-xl shadow">
           <h3 className="text-gray-500">Total Complaints</h3>
           <p className="text-3xl font-bold">{analytics?.total ?? 0}</p>
+        </div>
+        <div className="bg-white rounded-xl shadow p-5 mb-8">
+          <h2 className="text-xl font-bold mb-5">
+            <div className="bg-white rounded-xl shadow p-5 mb-8">
+              <h2 className="text-xl font-bold mb-5">Status Distribution</h2>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="h-[300px]">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart
+                      data={[
+                        { name: "Pending", count: statusCounts.pending },
+                        {
+                          name: "Under Review",
+                          count: statusCounts.underReview,
+                        },
+                        { name: "Assigned", count: statusCounts.assigned },
+                        { name: "In Progress", count: statusCounts.inProgress },
+                        { name: "Resolved", count: statusCounts.resolved },
+                      ]}
+                    >
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="name" />
+                      <YAxis allowDecimals={false} />
+                      <Tooltip />
+                      <Bar dataKey="count" />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+
+                <div className="h-[300px]">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie
+                        data={[
+                          { name: "Pending", value: statusCounts.pending },
+                          {
+                            name: "Under Review",
+                            value: statusCounts.underReview,
+                          },
+                          { name: "Assigned", value: statusCounts.assigned },
+                          {
+                            name: "In Progress",
+                            value: statusCounts.inProgress,
+                          },
+                          { name: "Resolved", value: statusCounts.resolved },
+                        ]}
+                        dataKey="value"
+                        nameKey="name"
+                        cx="50%"
+                        cy="50%"
+                        outerRadius={100}
+                        label
+                      />
+                      <Tooltip />
+                      <Legend />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
+            </div>
+          </h2>
+
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+            <div className="bg-yellow-100 p-4 rounded-lg">
+              <p className="text-gray-600">Pending</p>
+              <p className="text-2xl font-bold">{statusCounts.pending}</p>
+            </div>
+
+            <div className="bg-blue-100 p-4 rounded-lg">
+              <p className="text-gray-600">Under Review</p>
+              <p className="text-2xl font-bold">{statusCounts.underReview}</p>
+            </div>
+
+            <div className="bg-purple-100 p-4 rounded-lg">
+              <p className="text-gray-600">Assigned</p>
+              <p className="text-2xl font-bold">{statusCounts.assigned}</p>
+            </div>
+
+            <div className="bg-orange-100 p-4 rounded-lg">
+              <p className="text-gray-600">In Progress</p>
+              <p className="text-2xl font-bold">{statusCounts.inProgress}</p>
+            </div>
+
+            <div className="bg-green-100 p-4 rounded-lg">
+              <p className="text-gray-600">Resolved</p>
+              <p className="text-2xl font-bold">{statusCounts.resolved}</p>
+            </div>
+          </div>
         </div>
 
         <ComplaintHeatmap complaints={analytics?.complaints || []} />
