@@ -2,6 +2,8 @@ import { useEffect } from "react";
 import {
   MapContainer,
   TileLayer,
+  Marker,
+  Popup,
   useMap,
 } from "react-leaflet";
 import L from "leaflet";
@@ -42,6 +44,56 @@ function HeatLayer({ complaints }) {
   return null;
 }
 
+function ComplaintMarkers({ complaints }) {
+  const validComplaints = complaints.filter(
+    (complaint) =>
+      complaint.coordinates?.latitude != null &&
+      complaint.coordinates?.longitude != null
+  );
+
+  return (
+    <>
+      {validComplaints.map((complaint) => (
+        <Marker
+          key={complaint._id}
+          position={[
+            complaint.coordinates.latitude,
+            complaint.coordinates.longitude,
+          ]}
+        >
+          <Popup>
+            <div className="min-w-[220px]">
+              <h3 className="font-bold text-lg mb-2">
+                {complaint.title}
+              </h3>
+
+              <p>
+                <strong>Complaint ID:</strong>{" "}
+                {complaint.complaintId}
+              </p>
+
+              <p>
+                <strong>Category:</strong>{" "}
+                {complaint.category}
+              </p>
+
+              <p>
+                <strong>Status:</strong>{" "}
+                {complaint.status}
+              </p>
+
+              <p>
+                <strong>Location:</strong>{" "}
+                {complaint.location}
+              </p>
+            </div>
+          </Popup>
+        </Marker>
+      ))}
+    </>
+  );
+}
+
 function ComplaintHeatmap({ complaints }) {
   return (
     <div className="bg-white rounded-xl shadow p-5 mb-8">
@@ -62,6 +114,7 @@ function ComplaintHeatmap({ complaints }) {
           />
 
           <HeatLayer complaints={complaints} />
+          <ComplaintMarkers complaints={complaints} />
         </MapContainer>
       </div>
     </div>
