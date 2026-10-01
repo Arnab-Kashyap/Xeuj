@@ -1,39 +1,47 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, NavLink } from "react-router-dom";
 import { SignedIn, SignedOut, UserButton } from "@clerk/clerk-react";
 
 function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 100);
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   const navLinkClass = ({ isActive }) =>
-    `transition ${
+    `transition text-sm font-medium ${
       isActive
-        ? "text-green-700 font-semibold"
+        ? "text-green-700"
         : "text-gray-700 hover:text-green-700"
     }`;
 
   return (
-    <nav className="bg-white border-b border-gray-200 sticky top-0 z-50">
-      <div className="max-w-7xl mx-auto px-6">
-        <div className="h-16 flex items-center justify-between">
-
+    <nav className="fixed top-0 left-0 right-0 z-50 px-6 py-4">
+      <div
+        className={`max-w-6xl mx-auto transition-all duration-500 rounded-2xl ${
+          isScrolled
+            ? "backdrop-blur-xl bg-white/40 border border-white/30 shadow-lg"
+            : "backdrop-blur-0 bg-transparent border border-transparent"
+        }`}
+      >
+        <div className="px-6 py-3 flex items-center justify-between">
           <Link
             to="/"
             className="flex items-center gap-2"
             onClick={() => setMenuOpen(false)}
           >
-            <div className="w-9 h-9 bg-green-700 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-lg">X</span>
-            </div>
-
-            <div>
-              <h1 className="text-xl font-bold text-green-700">
-                Xeuj
-              </h1>
-              <p className="text-[10px] text-gray-500 -mt-1">
-                Civic Issue Reporting
-              </p>
-            </div>
+            <img
+              src="/images/xeuj-logo-navbar-transparent.png"
+              alt="Xeuj Logo"
+              className="h-10 w-auto"
+            />
           </Link>
 
           <div className="hidden md:flex items-center gap-8">
@@ -41,120 +49,103 @@ function Navbar() {
               Home
             </NavLink>
 
+            <NavLink to="/track" className={navLinkClass}>
+              Track
+            </NavLink>
+
+            <NavLink to="/report" className={navLinkClass}>
+              Report
+            </NavLink>
+          </div>
+
+          <div className="hidden md:flex items-center gap-4">
             <SignedIn>
-              <NavLink to="/report" className={navLinkClass}>
+              <Link
+                to="/report"
+                className="bg-green-700 hover:bg-green-800 text-white px-5 py-2 rounded-full font-semibold text-sm transition shadow-md hover:shadow-lg"
+              >
                 Report Issue
-              </NavLink>
-
-              <NavLink to="/track" className={navLinkClass}>
-                Track Complaint
-              </NavLink>
-            </SignedIn>
-
-            <SignedIn>
-              <NavLink to="/admin" className={navLinkClass}>
-                Admin
-              </NavLink>
+              </Link>
+              <UserButton afterSignOutUrl="/" />
             </SignedIn>
 
             <SignedOut>
               <Link
-                to="/login"
-                className="text-gray-700 hover:text-green-700 transition"
-              >
-                Login
-              </Link>
-
-              <Link
                 to="/register"
-                className="bg-green-700 hover:bg-green-800 text-white px-5 py-2 rounded-lg transition"
+                className="bg-green-700 hover:bg-green-800 text-white px-5 py-2 rounded-full font-semibold text-sm transition shadow-md hover:shadow-lg"
               >
                 Get Started
               </Link>
             </SignedOut>
-
-            <SignedIn>
-              <UserButton afterSignOutUrl="/" />
-            </SignedIn>
           </div>
 
           <button
             type="button"
             onClick={() => setMenuOpen(!menuOpen)}
-            className="md:hidden p-2 rounded-lg hover:bg-gray-100"
+            className="md:hidden p-2 rounded-lg hover:bg-white/20 transition"
           >
-            <span className="text-2xl">
+            <span className="text-2xl text-gray-800">
               {menuOpen ? "✕" : "☰"}
             </span>
           </button>
         </div>
 
         {menuOpen && (
-          <div className="md:hidden border-t border-gray-100 py-4 space-y-3">
-
+          <div className="md:hidden border-t border-white/20 px-6 py-4 space-y-3">
             <NavLink
               to="/"
               onClick={() => setMenuOpen(false)}
               className={navLinkClass}
             >
-              <div className="px-3 py-2 rounded-lg hover:bg-green-50">
+              <div className="px-3 py-2 rounded-lg hover:bg-white/20 transition">
                 Home
               </div>
             </NavLink>
 
-            <SignedIn>
-              <NavLink
-                to="/report"
-                onClick={() => setMenuOpen(false)}
-                className={navLinkClass}
-              >
-                <div className="px-3 py-2 rounded-lg hover:bg-green-50">
-                  Report Issue
-                </div>
-              </NavLink>
-
-              <NavLink
-                to="/track"
-                onClick={() => setMenuOpen(false)}
-                className={navLinkClass}
-              >
-                <div className="px-3 py-2 rounded-lg hover:bg-green-50">
-                  Track Complaint
-                </div>
-              </NavLink>
-
-              <NavLink
-                to="/admin"
-                onClick={() => setMenuOpen(false)}
-                className={navLinkClass}
-              >
-                <div className="px-3 py-2 rounded-lg hover:bg-green-50">
-                  Admin
-                </div>
-              </NavLink>
-
-              <div className="px-3 py-2">
-                <UserButton afterSignOutUrl="/" />
+            <NavLink
+              to="/track"
+              onClick={() => setMenuOpen(false)}
+              className={navLinkClass}
+            >
+              <div className="px-3 py-2 rounded-lg hover:bg-white/20 transition">
+                Track
               </div>
-            </SignedIn>
+            </NavLink>
 
-            <SignedOut>
-              <Link
-                to="/login"
-                onClick={() => setMenuOpen(false)}
-                className="block px-3 py-2 text-gray-700"
-              >
-                Login
-              </Link>
+            <NavLink
+              to="/report"
+              onClick={() => setMenuOpen(false)}
+              className={navLinkClass}
+            >
+              <div className="px-3 py-2 rounded-lg hover:bg-white/20 transition">
+                Report
+              </div>
+            </NavLink>
 
-              <Link
-                to="/register"
-                onClick={() => setMenuOpen(false)}
-                className="block bg-green-700 text-white text-center px-4 py-2 rounded-lg"
-              >
-                Get Started
-              </Link>
-            </SignedOut>
+            <div className="pt-2 space-y-2">
+              <SignedIn>
+                <Link
+                  to="/report"
+                  onClick={() => setMenuOpen(false)}
+                  className="block bg-green-700 hover:bg-green-800 text-white text-center px-5 py-2 rounded-full font-semibold transition"
+                >
+                  Report Issue
+                </Link>
+                <div className="px-3 py-2">
+                  <UserButton afterSignOutUrl="/" />
+                </div>
+              </SignedIn>
+
+              <SignedOut>
+                <Link
+                  to="/register"
+                  onClick={() => setMenuOpen(false)}
+                  className="block bg-green-700 hover:bg-green-800 text-white text-center px-5 py-2 rounded-full font-semibold transition"
+                >
+                  Get Started
+                </Link>
+              </SignedOut>
+            </div>
           </div>
         )}
       </div>

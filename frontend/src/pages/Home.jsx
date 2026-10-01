@@ -1,16 +1,15 @@
 import Navbar from "../components/Navbar";
 import Hero from "../sections/Hero";
+import HowItWorks from "../sections/HowItWorksSection";
 import Features from "../sections/Features";
 
 function Home() {
   return (
-    <div className="min-h-screen bg-green-50">
+    <div>
       <Navbar />
-
-      <main>
-        <Hero />
-        <Features />
-      </main>
+      <Hero />
+      <HowItWorks />
+      <Features />
     </div>
   );
 }
