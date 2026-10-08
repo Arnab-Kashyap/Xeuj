@@ -12,7 +12,7 @@ function Hero() {
   const backgroundRef = useRef(null);
 
   useEffect(() => {
-    if (!scrollIndicatorRef.current) return;
+    if (!scrollIndicatorRef.current || !contentRef.current) return;
 
     gsap.to(scrollIndicatorRef.current, {
       y: 10,
@@ -22,7 +22,22 @@ function Hero() {
       ease: "sine.inOut",
     });
 
+    window.addEventListener("scroll", () => {
+      const scrolled = window.scrollY;
+      const fadeStart = window.innerHeight * 0.4;
+      const fadeEnd = window.innerHeight * 0.95;
+      
+      if (scrolled > fadeStart && contentRef.current) {
+        const progress = (scrolled - fadeStart) / (fadeEnd - fadeStart);
+        const opacity = Math.max(0, 1 - progress);
+        contentRef.current.style.opacity = opacity;
+      } else if (contentRef.current) {
+        contentRef.current.style.opacity = 1;
+      }
+    });
+
     return () => {
+      window.removeEventListener("scroll", null);
       ScrollTrigger.getAll().forEach(trigger => trigger.kill());
     };
   }, []);
@@ -46,7 +61,7 @@ function Hero() {
 
       <div
         ref={contentRef}
-        className="relative h-full w-full flex flex-col items-center justify-center px-6"
+        className="relative h-full w-full flex flex-col items-center justify-center px-6 transition-opacity"
       >
         <div className="max-w-3xl text-center z-10">
           <h1 className="text-5xl md:text-7xl font-serif font-light text-gray-800 leading-tight mb-6">
