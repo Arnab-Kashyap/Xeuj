@@ -1,6 +1,6 @@
 import Navbar from "../components/Navbar";
 import Hero from "../sections/Hero";
-import HowItWorks from "../sections/HowItWorksSection";
+import HowItWorks from "../sections/HowItWorks";
 import Features from "../sections/Features";
 
 function Home() {
