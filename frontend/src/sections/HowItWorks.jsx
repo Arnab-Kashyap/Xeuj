@@ -16,28 +16,32 @@ function HowItWorks() {
       title: "Report an Issue",
       description:
         "Capture the problem with a photo and share the details of your complaint.",
-      color: "bg-blue-100",
+      bgColor: "bg-[#FAF9F4]",
+      borderColor: "border-[#E8EBDF]",
     },
     {
       id: 2,
       title: "Add Location",
       description:
         "Tell us where it is so the right team can find it quickly.",
-      color: "bg-green-100",
+      bgColor: "bg-[#FAF9F4]",
+      borderColor: "border-[#E8EBDF]",
     },
     {
       id: 3,
       title: "Track Progress",
       description:
         "Check the status of your complaint anytime, anywhere.",
-      color: "bg-purple-100",
+      bgColor: "bg-[#FAF9F4]",
+      borderColor: "border-[#E8EBDF]",
     },
     {
       id: 4,
       title: "Get Resolution",
       description:
         "Stay informed when the issue is solved.",
-      color: "bg-yellow-100",
+      bgColor: "bg-[#FAF9F4]",
+      borderColor: "border-[#E8EBDF]",
     },
   ];
 
@@ -227,20 +231,20 @@ function HowItWorks() {
     <>
       <div className="h-screen"></div>
 
-      <section className="w-full bg-gray-50 py-20 md:py-28 z-10 relative">
+      <section className="w-full bg-[#E8EBDF] py-20 md:py-28 z-10 relative">
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-16">
-            <p className="text-green-700 text-sm font-semibold tracking-widest uppercase mb-4">
+            <p className="text-[#31583B] text-sm font-semibold tracking-widest uppercase mb-4">
               How Xeuj Works
             </p>
 
-            <h2 className="text-4xl md:text-5xl font-serif font-light text-gray-900 mb-6">
+            <h2 className="text-4xl md:text-5xl font-serif font-light text-[#202923] mb-6">
               Four simple steps
               <br />
-              to make a <span className="text-green-700">change.</span>
+              to make a <span className="text-[#31583B]">change.</span>
             </h2>
 
-            <p className="text-gray-600 max-w-2xl mx-auto text-lg">
+            <p className="text-[#7C857C] max-w-2xl mx-auto text-lg">
               From a local problem to a resolved issue — it only takes a few clicks.
               <br />
               Here's how Xeuj works.
@@ -257,23 +261,23 @@ function HowItWorks() {
                 ref={(el) => {
                   cardsRef.current[index] = el;
                 }}
-                className={`absolute w-80 h-72 rounded-2xl p-6 shadow-lg cursor-pointer ${step.color}`}
+                className={`absolute w-80 h-72 rounded-2xl p-6 shadow-sm cursor-pointer border ${step.bgColor} ${step.borderColor}`}
                 onClick={() => handleCardClick(index)}
                 style={{ willChange: "transform" }}
               >
-                <div className="text-sm font-semibold text-green-700 mb-2">
+                <div className="text-sm font-semibold text-[#31583B] mb-2">
                   STEP {String(step.id).padStart(2, "0")}
                 </div>
 
-                <h3 className="text-2xl font-bold text-gray-900 mb-3">
+                <h3 className="text-2xl font-bold text-[#202923] mb-3">
                   {step.title}
                 </h3>
 
-                <p className="text-gray-700 text-sm leading-relaxed mb-6">
+                <p className="text-[#7C857C] text-sm leading-relaxed mb-6">
                   {step.description}
                 </p>
 
-                <div className="w-full h-40 bg-white/40 rounded-lg flex items-center justify-center text-gray-400 font-semibold">
+                <div className="w-full h-40 bg-[#F5F3EC] rounded-lg flex items-center justify-center text-[#7C857C] font-semibold border border-[#E8EBDF]">
                   Image Placeholder
                 </div>
               </div>
@@ -284,7 +288,7 @@ function HowItWorks() {
             <button
               onClick={handlePrev}
               disabled={animatingRef.current}
-              className="p-3 rounded-full hover:bg-gray-200 transition font-bold text-xl"
+              className="p-3 rounded-full hover:bg-[#E8EBDF] transition font-bold text-xl text-[#31583B]"
             >
               ←
             </button>
@@ -296,8 +300,8 @@ function HowItWorks() {
                   onClick={() => handleIndicatorClick(index)}
                   className={`w-12 h-12 rounded-full font-bold transition ${
                     activeStep === index
-                      ? "bg-green-700 text-white"
-                      : "bg-gray-300 text-gray-700 hover:bg-gray-400"
+                      ? "bg-[#31583B] text-[#FAF9F4]"
+                      : "bg-[#E8EBDF] text-[#7C857C] hover:bg-[#D8DCC9]"
                   }`}
                 >
                   {String(step.id).padStart(2, "0")}
@@ -308,32 +312,10 @@ function HowItWorks() {
             <button
               onClick={handleNext}
               disabled={animatingRef.current}
-              className="p-3 rounded-full hover:bg-gray-200 transition font-bold text-xl"
+              className="p-3 rounded-full hover:bg-[#E8EBDF] transition font-bold text-xl text-[#31583B]"
             >
               →
             </button>
-          </div>
-
-          <div className="mt-20 grid grid-cols-2 md:grid-cols-4 gap-6">
-            <div className="text-center p-6 bg-green-50 rounded-xl">
-              <p className="text-3xl font-bold text-green-700 mb-2">1,254+</p>
-              <p className="text-sm text-gray-600">Issues Reported</p>
-            </div>
-
-            <div className="text-center p-6 bg-green-50 rounded-xl">
-              <p className="text-3xl font-bold text-green-700 mb-2">980+</p>
-              <p className="text-sm text-gray-600">Resolved</p>
-            </div>
-
-            <div className="text-center p-6 bg-green-50 rounded-xl">
-              <p className="text-3xl font-bold text-green-700 mb-2">2.3</p>
-              <p className="text-sm text-gray-600">Avg. Days to Resolve</p>
-            </div>
-
-            <div className="text-center p-6 bg-green-50 rounded-xl">
-              <p className="text-3xl font-bold text-green-700 mb-2">12K+</p>
-              <p className="text-sm text-gray-600">Active Citizens</p>
-            </div>
           </div>
         </div>
       </section>
