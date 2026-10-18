@@ -383,6 +383,33 @@ export const updateComplaintStatus = async (
     });
   }
 };
+export const getRecentReports = async (req, res) => {
+  try {
+    const limit = parseInt(req.query.limit) || 3;
+
+    const reports = await Complaint.find()
+      .sort({ createdAt: -1 })
+      .limit(limit)
+      .select("title category status image location createdAt");
+
+    const formattedReports = reports.map(report => ({
+      _id: report._id,
+      title: report.title,
+      category: report.category,
+      status: report.status,
+      imageUrl: report.image,
+      location: report.location,
+      createdAt: report.createdAt,
+    }));
+
+    res.json(formattedReports);
+  } catch (error) {
+    console.error("Error fetching recent reports:", error);
+    res.status(500).json({ error: "Failed to fetch reports" });
+  }
+};
+
+
 
 export const deleteComplaint = async (
   req,

@@ -26,7 +26,7 @@ function Hero() {
       const scrolled = window.scrollY;
       const fadeStart = window.innerHeight * 0.4;
       const fadeEnd = window.innerHeight * 0.95;
-      
+
       if (scrolled > fadeStart && contentRef.current) {
         const progress = (scrolled - fadeStart) / (fadeEnd - fadeStart);
         const opacity = Math.max(0, 1 - progress);
@@ -38,14 +38,14 @@ function Hero() {
 
     return () => {
       window.removeEventListener("scroll", null);
-      ScrollTrigger.getAll().forEach(trigger => trigger.kill());
+      ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
     };
   }, []);
 
   return (
     <section
       ref={heroRef}
-      className="fixed inset-0 w-full h-screen bg-gray-100 overflow-hidden z-0"
+      className="relative w-full h-screen bg-gray-100 overflow-hidden"
     >
       <div
         ref={backgroundRef}
