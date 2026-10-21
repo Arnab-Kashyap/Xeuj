@@ -141,7 +141,7 @@ function LocationMap({
   readOnly = false,
 }) {
   return (
-    <div className="w-full h-[320px] rounded-xl overflow-hidden border">
+    <div className="w-full h-[320px] rounded-2xl overflow-hidden border border-[#E8EBDF] [&_.leaflet-container]:outline-none">
       <MapContainer
         center={[latitude, longitude]}
         zoom={16}

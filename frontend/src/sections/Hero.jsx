@@ -1,20 +1,40 @@
 import { Link } from "react-router-dom";
-import { useEffect, useRef } from "react";
+import { useEffect, useLayoutEffect, useRef } from "react";
 import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-
-gsap.registerPlugin(ScrollTrigger);
 
 function Hero() {
-  const heroRef = useRef(null);
+  const introRef = useRef(null);
   const contentRef = useRef(null);
   const scrollIndicatorRef = useRef(null);
-  const backgroundRef = useRef(null);
+
+  useLayoutEffect(() => {
+    const intro = introRef.current;
+    if (!intro) return;
+
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduceMotion) return;
+
+    const tween = gsap.fromTo(
+      intro,
+      { opacity: 0, y: 40 },
+      {
+        opacity: 1,
+        y: 0,
+        duration: 1.4,
+        ease: "power2.out",
+        clearProps: "transform",
+      }
+    );
+
+    return () => tween.kill();
+  }, []);
 
   useEffect(() => {
-    if (!scrollIndicatorRef.current || !contentRef.current) return;
+    const indicator = scrollIndicatorRef.current;
+    const content = contentRef.current;
+    if (!indicator || !content) return;
 
-    gsap.to(scrollIndicatorRef.current, {
+    const bounce = gsap.to(indicator, {
       y: 10,
       duration: 1,
       repeat: -1,
@@ -22,33 +42,31 @@ function Hero() {
       ease: "sine.inOut",
     });
 
-    window.addEventListener("scroll", () => {
+    const handleScroll = () => {
       const scrolled = window.scrollY;
       const fadeStart = window.innerHeight * 0.4;
       const fadeEnd = window.innerHeight * 0.95;
 
-      if (scrolled > fadeStart && contentRef.current) {
+      if (scrolled > fadeStart) {
         const progress = (scrolled - fadeStart) / (fadeEnd - fadeStart);
-        const opacity = Math.max(0, 1 - progress);
-        contentRef.current.style.opacity = opacity;
-      } else if (contentRef.current) {
-        contentRef.current.style.opacity = 1;
+        content.style.opacity = Math.max(0, 1 - progress);
+      } else {
+        content.style.opacity = 1;
       }
-    });
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    handleScroll();
 
     return () => {
-      window.removeEventListener("scroll", null);
-      ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
+      window.removeEventListener("scroll", handleScroll);
+      bounce.kill();
     };
   }, []);
 
   return (
-    <section
-      ref={heroRef}
-      className="relative w-full h-screen bg-gray-100 overflow-hidden"
-    >
+    <section className="sticky top-0 z-0 w-full h-screen bg-[#F5F3EC] overflow-hidden">
       <div
-        ref={backgroundRef}
         className="absolute inset-0 w-full h-full"
         style={{
           backgroundImage: "url('/images/xeuj-hero-bg.jpg')",
@@ -56,23 +74,23 @@ function Hero() {
           backgroundPosition: "center",
         }}
       >
-        <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-transparent to-black/5"></div>
+        <div className="absolute inset-0 bg-gradient-to-b from-[#263D30]/15 via-transparent to-[#263D30]/10" />
       </div>
 
       <div
         ref={contentRef}
-        className="relative h-full w-full flex flex-col items-center justify-center px-6 transition-opacity"
+        className="relative h-full w-full flex flex-col items-center justify-center px-6"
       >
-        <div className="max-w-3xl text-center z-10">
-          <h1 className="text-5xl md:text-7xl font-serif font-light text-gray-800 leading-tight mb-6">
+        <div ref={introRef} className="max-w-3xl text-center">
+          <h1 className="text-5xl md:text-7xl font-serif font-light text-[#202923] leading-tight mb-6">
             A better city
             <br />
             begins with you.
           </h1>
 
-          <div className="w-16 h-1 bg-gray-400 mx-auto mb-8"></div>
+          <div className="w-16 h-1 bg-[#7C857C] mx-auto mb-8" />
 
-          <p className="text-lg md:text-xl text-gray-600 mb-12 font-light">
+          <p className="text-lg md:text-xl text-[#7C857C] mb-12 font-light">
             Report road issues and waste problems.
             <br />
             Track progress. See real change.
@@ -81,29 +99,30 @@ function Hero() {
           <div className="flex flex-col sm:flex-row gap-6 justify-center mb-16">
             <Link
               to="/report"
-              className="bg-green-700 hover:bg-green-800 text-white px-8 py-4 rounded-full font-semibold text-center transition shadow-lg hover:shadow-xl transform hover:scale-105 duration-300 flex items-center justify-center gap-2"
+              className="bg-[#31583B] hover:bg-[#263D30] text-[#FAF9F4] px-8 py-4 rounded-full font-semibold text-center transition shadow-lg hover:shadow-xl transform hover:scale-105 duration-300 flex items-center justify-center gap-2"
             >
               Report an Issue <span className="text-xl">→</span>
             </Link>
 
             <Link
               to="/track"
-              className="border-2 border-gray-600 text-gray-600 hover:bg-gray-600 hover:text-white px-8 py-4 rounded-full font-semibold text-center transition duration-300 flex items-center justify-center gap-2"
+              className="border-2 border-[#31583B] text-[#31583B] hover:bg-[#31583B] hover:text-[#FAF9F4] px-8 py-4 rounded-full font-semibold text-center transition duration-300 flex items-center justify-center gap-2"
             >
-              Track Complaint <span className="text-xl">📍</span>
+              Track Complaint <span className="text-xl">→</span>
             </Link>
           </div>
         </div>
       </div>
 
-      <div
-        ref={scrollIndicatorRef}
-        className="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex flex-col items-center gap-3 z-20"
-      >
-        <span className="text-gray-600 text-xs tracking-widest uppercase font-light">
-          Scroll
-        </span>
-        <div className="w-0.5 h-8 bg-gray-400"></div>
+      <div className="absolute bottom-8 inset-x-0 flex justify-center z-20 pointer-events-none">
+        <div ref={scrollIndicatorRef} className="flex flex-col items-center gap-2">
+          <span className="text-[#7C857C] text-xs tracking-widest uppercase font-light">
+            Scroll
+          </span>
+          <div className="w-6 h-10 border-2 border-[#7C857C] rounded-full flex items-center justify-center">
+            <div className="w-1 h-2 bg-[#7C857C] rounded-full animate-pulse" />
+          </div>
+        </div>
       </div>
     </section>
   );

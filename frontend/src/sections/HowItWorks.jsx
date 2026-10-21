@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import gsap from "gsap";
+import Reveal from "../components/Reveal";
 
 function HowItWorks() {
   const [activeStep, setActiveStep] = useState(0);
@@ -228,11 +229,9 @@ function HowItWorks() {
   const handleIndicatorClick = handleCardClick;
 
   return (
-    <>
-      <div className="h-screen"></div>
-
-      <section className="w-full bg-[#E8EBDF] py-20 md:py-28 z-10 relative">
-        <div className="max-w-7xl mx-auto px-6">
+    <section className="w-full bg-[#E8EBDF] py-20 md:py-28 z-10 relative">
+      <div className="max-w-7xl mx-auto px-6">
+        <Reveal>
           <div className="text-center mb-16">
             <p className="text-[#31583B] text-sm font-semibold tracking-widest uppercase mb-4">
               How Xeuj Works
@@ -250,7 +249,9 @@ function HowItWorks() {
               Here's how Xeuj works.
             </p>
           </div>
+        </Reveal>
 
+        <Reveal delay={0.2}>
           <div
             ref={carouselRef}
             className="relative w-full h-96 mb-12 flex items-center justify-center overflow-hidden"
@@ -283,43 +284,43 @@ function HowItWorks() {
               </div>
             ))}
           </div>
+        </Reveal>
 
-          <div className="flex items-center justify-center gap-6 md:gap-8">
-            <button
-              onClick={handlePrev}
-              disabled={animatingRef.current}
-              className="p-3 rounded-full hover:bg-[#E8EBDF] transition font-bold text-xl text-[#31583B]"
-            >
-              ←
-            </button>
+        <div className="flex items-center justify-center gap-6 md:gap-8">
+          <button
+            onClick={handlePrev}
+            disabled={animatingRef.current}
+            className="p-3 rounded-full hover:bg-[#E8EBDF] transition font-bold text-xl text-[#31583B]"
+          >
+            ←
+          </button>
 
-            <div className="flex gap-4">
-              {steps.map((step, index) => (
-                <button
-                  key={step.id}
-                  onClick={() => handleIndicatorClick(index)}
-                  className={`w-12 h-12 rounded-full font-bold transition ${
-                    activeStep === index
-                      ? "bg-[#31583B] text-[#FAF9F4]"
-                      : "bg-[#E8EBDF] text-[#7C857C] hover:bg-[#D8DCC9]"
-                  }`}
-                >
-                  {String(step.id).padStart(2, "0")}
-                </button>
-              ))}
-            </div>
-
-            <button
-              onClick={handleNext}
-              disabled={animatingRef.current}
-              className="p-3 rounded-full hover:bg-[#E8EBDF] transition font-bold text-xl text-[#31583B]"
-            >
-              →
-            </button>
+          <div className="flex gap-4">
+            {steps.map((step, index) => (
+              <button
+                key={step.id}
+                onClick={() => handleIndicatorClick(index)}
+                className={`w-12 h-12 rounded-full font-bold transition ${
+                  activeStep === index
+                    ? "bg-[#31583B] text-[#FAF9F4]"
+                    : "bg-[#E8EBDF] text-[#7C857C] hover:bg-[#D8DCC9]"
+                }`}
+              >
+                {String(step.id).padStart(2, "0")}
+              </button>
+            ))}
           </div>
+
+          <button
+            onClick={handleNext}
+            disabled={animatingRef.current}
+            className="p-3 rounded-full hover:bg-[#E8EBDF] transition font-bold text-xl text-[#31583B]"
+          >
+            →
+          </button>
         </div>
-      </section>
-    </>
+      </div>
+    </section>
   );
 }
 

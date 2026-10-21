@@ -2,7 +2,7 @@ import Navbar from "../components/Navbar";
 import Hero from "../sections/Hero";
 import HowItWorks from "../sections/HowItWorks";
 import RecentReports from "../sections/RecentReports";
-
+import Footer from "../sections/Footer";
 
 function Home() {
   return (
@@ -11,6 +11,7 @@ function Home() {
       <Hero />
       <HowItWorks />
       <RecentReports />
+      <Footer />
     </div>
   );
 }

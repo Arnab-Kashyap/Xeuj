@@ -13,6 +13,7 @@ import {
   RefreshCw,
   Layers,
 } from "lucide-react";
+import Reveal from "../components/Reveal";
 
 const API_URL = "http://localhost:5000/api/complaints/recent?limit=3";
 
@@ -109,7 +110,7 @@ function RecentReports() {
 
   if (loading) {
     return (
-      <section className="w-full bg-[#F5F3EC] py-20 md:py-28 relative">
+      <section className="w-full bg-[#F5F3EC] py-20 md:py-28 relative z-10">
         <div className="max-w-7xl mx-auto px-6">
           <div className="flex items-center justify-center py-12">
             <p className="text-[#7C857C]">Loading reports...</p>
@@ -124,89 +125,90 @@ function RecentReports() {
   }
 
   return (
-    <section className="w-full bg-[#F5F3EC] py-20 md:py-28 relative">
+    <section className="w-full bg-[#F5F3EC] py-20 md:py-28 relative z-10">
       <div className="max-w-7xl mx-auto px-6">
-        <div className="flex items-start justify-between gap-6 mb-16">
-          <div>
-            <p className="text-[#31583B] text-xs font-semibold tracking-widest uppercase mb-3">
-              Recent Reports
-            </p>
-            <h2 className="text-4xl md:text-5xl font-serif font-light text-[#202923]">
-              What's being
-              <br />
-              reported?
-            </h2>
-            <p className="text-[#7C857C] max-w-md text-lg mt-4">
-              Real issues from your community. Reported by people, for a cleaner and safer city.
-            </p>
-          </div>
+        <Reveal>
+          <div className="flex items-start justify-between gap-6 mb-16">
+            <div>
+              <p className="text-[#31583B] text-xs font-semibold tracking-widest uppercase mb-3">
+                Recent Reports
+              </p>
+              <h2 className="text-4xl md:text-5xl font-serif font-light text-[#202923]">
+                What's being
+                <br />
+                reported?
+              </h2>
+              <p className="text-[#7C857C] max-w-md text-lg mt-4">
+                Real issues from your community. Reported by people, for a cleaner and safer city.
+              </p>
+            </div>
 
-          <Link
-            to="/track"
-            className="text-[#31583B] font-medium text-sm hover:text-[#202923] transition flex items-center gap-2 whitespace-nowrap"
-          >
-            View all reports
-            <span className="text-lg">→</span>
-          </Link>
-        </div>
+            <Link
+              to="/track"
+              className="text-[#31583B] font-medium text-sm hover:text-[#202923] transition flex items-center gap-2 whitespace-nowrap"
+            >
+              View all reports
+              <span className="text-lg">→</span>
+            </Link>
+          </div>
+        </Reveal>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {reports.map((report) => {
+          {reports.map((report, index) => {
             const category = getCategoryInfo(report.category);
             const status = getStatusInfo(report.status);
             const CategoryIcon = category.icon;
             const StatusIcon = status.icon;
 
             return (
-              <div
-                key={report._id}
-                className="group bg-[#FAF9F4] rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition border border-[#E8EBDF]"
-              >
-                <div className="relative h-56 overflow-hidden bg-[#E8EBDF]">
-                  {report.imageUrl ? (
-                    <img
-                      src={report.imageUrl}
-                      alt={report.title}
-                      className="w-full h-full object-cover group-hover:scale-105 transition duration-500"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center text-[#7C857C]">
-                      No image available
-                    </div>
-                  )}
+              <Reveal key={report._id} delay={index * 0.12}>
+                <div className="group bg-[#FAF9F4] rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition border border-[#E8EBDF]">
+                  <div className="relative h-56 overflow-hidden bg-[#E8EBDF]">
+                    {report.imageUrl ? (
+                      <img
+                        src={report.imageUrl}
+                        alt={report.title}
+                        className="w-full h-full object-cover group-hover:scale-105 transition duration-500"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-[#7C857C]">
+                        No image available
+                      </div>
+                    )}
 
-                  <div className="absolute top-4 right-4">
-                    <div
-                      className={`px-3 py-1.5 rounded-full flex items-center gap-1.5 ${status.badge}`}
-                    >
-                      <StatusIcon size={14} />
-                      <span className="text-xs font-semibold">{status.label}</span>
+                    <div className="absolute top-4 right-4">
+                      <div
+                        className={`px-3 py-1.5 rounded-full flex items-center gap-1.5 ${status.badge}`}
+                      >
+                        <StatusIcon size={14} />
+                        <span className="text-xs font-semibold">{status.label}</span>
+                      </div>
                     </div>
+                  </div>
+
+                  <div className="p-6">
+                    <div className="flex items-center gap-2 mb-3">
+                      <CategoryIcon size={18} className="text-[#31583B]" />
+                      <span className="text-xs font-semibold text-[#31583B] uppercase tracking-wide">
+                        {category.label}
+                      </span>
+                    </div>
+
+                    <h3 className="text-lg font-bold text-[#202923] mb-3 line-clamp-2">
+                      {report.title}
+                    </h3>
+
+                    <div className="flex items-start gap-2 mb-4">
+                      <MapPin size={16} className="text-[#7C857C] mt-0.5 shrink-0" />
+                      <p className="text-sm text-[#7C857C] line-clamp-2">
+                        {report.location || "Location not specified"}
+                      </p>
+                    </div>
+
+                    <p className="text-xs text-[#7C857C]">{formatDate(report.createdAt)}</p>
                   </div>
                 </div>
-
-                <div className="p-6">
-                  <div className="flex items-center gap-2 mb-3">
-                    <CategoryIcon size={18} className="text-[#31583B]" />
-                    <span className="text-xs font-semibold text-[#31583B] uppercase tracking-wide">
-                      {category.label}
-                    </span>
-                  </div>
-
-                  <h3 className="text-lg font-bold text-[#202923] mb-3 line-clamp-2">
-                    {report.title}
-                  </h3>
-
-                  <div className="flex items-start gap-2 mb-4">
-                    <MapPin size={16} className="text-[#7C857C] mt-0.5 shrink-0" />
-                    <p className="text-sm text-[#7C857C] line-clamp-2">
-                      {report.location || "Location not specified"}
-                    </p>
-                  </div>
-
-                  <p className="text-xs text-[#7C857C]">{formatDate(report.createdAt)}</p>
-                </div>
-              </div>
+              </Reveal>
             );
           })}
         </div>
