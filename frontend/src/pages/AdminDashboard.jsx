@@ -14,7 +14,6 @@ import {
   LabelList,
 } from "recharts";
 import {
-  Sprout,
   FileText,
   Clock,
   Loader,
@@ -27,6 +26,7 @@ import {
   LayoutGrid,
   ShieldCheck,
   MapPin,
+  ChevronDown,
 } from "lucide-react";
 import ComplaintHeatmap from "../components/ComplaintHeatmap";
 import {
@@ -48,12 +48,12 @@ const categoryColors = {
   Other: "#A3A9A3",
 };
 
-const statusStyles = {
-  Pending: "bg-[#F6EBCB] text-[#8A5E10] border-[#E9D59A]",
-  "Under Review": "bg-[#E4ECF5] text-[#2F5F8A] border-[#C5D6E8]",
-  Assigned: "bg-[#E8EBDF] text-[#31583B] border-[#D2D9C4]",
-  "In Progress": "bg-[#E3EEF8] text-[#2F6A9E] border-[#BCD5EA]",
-  Resolved: "bg-[#31583B] text-[#FAF9F4] border-[#31583B]",
+const statusDotColors = {
+  Pending: "bg-[#C8921A]",
+  "Under Review": "bg-[#4F7FAF]",
+  Assigned: "bg-[#6E8F76]",
+  "In Progress": "bg-[#2F6A9E]",
+  Resolved: "bg-[#31583B]",
 };
 
 const cardClass = "bg-[#FAF9F4] border border-[#E8EBDF] rounded-2xl shadow-sm";
@@ -219,9 +219,12 @@ function AdminDashboard() {
     <div className="min-h-screen bg-[#F5F3EC] px-6 py-8 md:py-10">
       <div className="max-w-6xl mx-auto">
         <div className="flex items-center justify-between mb-10">
-          <div className="flex items-center gap-2 text-[#31583B]">
-            <Sprout size={26} strokeWidth={1.6} />
-            <span className="text-2xl font-serif font-light tracking-wide">xeuj</span>
+          <div className="inline-flex items-center rounded-xl bg-[#31583B] px-4 py-2">
+            <img
+              src="/images/xeuj-logo-navbar-transparent.png"
+              alt="Xeuj"
+              className="h-8 w-auto"
+            />
           </div>
 
           <div className="flex items-center gap-4">
@@ -497,7 +500,7 @@ function AdminDashboard() {
                           onChange={(e) =>
                             handleDepartmentChange(complaint._id, e.target.value)
                           }
-                          className="bg-[#FAF9F4] border border-[#D9DDD0] rounded-lg px-2.5 py-1.5 text-xs text-[#31583B] focus:outline-none focus:border-[#31583B] cursor-pointer"
+                          className="bg-transparent border border-[#D9DDD0] rounded-lg px-2.5 py-1.5 text-xs text-[#31583B] focus:outline-none focus:border-[#31583B] cursor-pointer"
                         >
                           {DEPARTMENTS.map((d) => (
                             <option key={d} value={d}>
@@ -508,21 +511,30 @@ function AdminDashboard() {
                       </td>
 
                       <td className="px-6 py-4">
-                        <select
-                          value={complaint.status || "Pending"}
-                          onChange={(e) =>
-                            handleStatusChange(complaint._id, e.target.value)
-                          }
-                          className={`appearance-none rounded-full border px-3 py-1 text-xs font-medium focus:outline-none cursor-pointer ${
-                            statusStyles[complaint.status] || statusStyles.Pending
-                          }`}
-                        >
-                          {STATUSES.map((s) => (
-                            <option key={s} value={s}>
-                              {s}
-                            </option>
-                          ))}
-                        </select>
+                        <div className="relative inline-flex items-center">
+                          <span
+                            className={`pointer-events-none absolute left-3 h-2 w-2 rounded-full ${
+                              statusDotColors[complaint.status] || statusDotColors.Pending
+                            }`}
+                          />
+                          <select
+                            value={complaint.status || "Pending"}
+                            onChange={(e) =>
+                              handleStatusChange(complaint._id, e.target.value)
+                            }
+                            className="appearance-none bg-transparent border border-[#D9DDD0] rounded-lg pl-7 pr-7 py-1.5 text-xs font-medium text-[#31583B] focus:outline-none focus:border-[#31583B] cursor-pointer"
+                          >
+                            {STATUSES.map((s) => (
+                              <option key={s} value={s}>
+                                {s}
+                              </option>
+                            ))}
+                          </select>
+                          <ChevronDown
+                            size={14}
+                            className="pointer-events-none absolute right-2.5 text-[#31583B]/70"
+                          />
+                        </div>
                       </td>
 
                       <td className="px-6 py-4">
