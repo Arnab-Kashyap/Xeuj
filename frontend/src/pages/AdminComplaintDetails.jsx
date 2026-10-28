@@ -1,575 +1,569 @@
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { Link, useNavigate, useParams } from "react-router-dom";
+import gsap from "gsap";
 import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  PieChart,
-  Pie,
-  Cell,
-  LabelList,
-} from "recharts";
-import {
-  FileText,
-  Clock,
-  Loader,
-  CheckCheck,
-  ArrowRight,
-  RefreshCw,
-  Search,
-  Eye,
-  Trash2,
-  LayoutGrid,
-  ShieldCheck,
-  MapPin,
+  ArrowLeft,
+  Building2,
+  Calendar,
+  Check,
   ChevronDown,
+  CircleDot,
+  Clock,
+  Droplets,
+  MapPin,
+  Route,
+  Trash2,
 } from "lucide-react";
-import ComplaintHeatmap from "../components/ComplaintHeatmap";
+import LocationMap from "../components/LocationMap";
 import {
-  getComplaintAnalytics,
-  getAllComplaints,
-  assignDepartment,
+  getComplaintById,
   updateStatus,
+  assignDepartment,
   deleteComplaint,
 } from "../services/complaintService";
+import Reveal from "../components/Reveal";
 
 const STATUSES = ["Pending", "Under Review", "Assigned", "In Progress", "Resolved"];
-const CATEGORIES = ["Road", "Waste", "Drainage", "Other"];
 const DEPARTMENTS = ["Pending", "PWD", "Municipality"];
 
-const categoryColors = {
-  Road: "#31583B",
-  Waste: "#C9A24D",
-  Drainage: "#7FA9CF",
-  Other: "#A3A9A3",
+const timelineSteps = ["Reported", "Assigned", "In Progress", "Resolved"];
+const lastStep = timelineSteps.length - 1;
+const segmentDuration = 1.5;
+
+const statusToStep = {
+  pending: 0,
+  "under review": 0,
+  assigned: 1,
+  "in progress": 2,
+  resolved: 3,
 };
 
-const statusDotColors = {
-  Pending: "bg-[#C8921A]",
-  "Under Review": "bg-[#4F7FAF]",
-  Assigned: "bg-[#6E8F76]",
-  "In Progress": "bg-[#2F6A9E]",
-  Resolved: "bg-[#31583B]",
+const categoryConfig = {
+  road: { label: "Road", icon: Route },
+  waste: { label: "Waste", icon: Trash2 },
+  drainage: { label: "Drainage", icon: Droplets },
+  other: { label: "Other", icon: CircleDot },
 };
+
+const formatDate = (value) =>
+  value
+    ? new Date(value).toLocaleDateString("en-GB", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+      })
+    : "Not available";
+
+const formatDateTime = (value) =>
+  value
+    ? new Date(value).toLocaleString("en-GB", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      })
+    : "Not available";
 
 const cardClass = "bg-[#FAF9F4] border border-[#E8EBDF] rounded-2xl shadow-sm";
 
-const tooltipStyle = {
-  background: "#FAF9F4",
-  border: "1px solid #E8EBDF",
-  borderRadius: 12,
-  color: "#31583B",
-  fontSize: 13,
-};
+function DetailField({ label, icon: Icon, children }) {
+  return (
+    <div>
+      <p className="text-xs uppercase tracking-wide text-[#31583B]/60 mb-2">
+        {label}
+      </p>
+      <div className="flex items-start gap-2 text-base text-[#31583B]">
+        {Icon && <Icon size={17} className="mt-1 shrink-0" />}
+        <span className="break-words">{children}</span>
+      </div>
+    </div>
+  );
+}
 
-function AdminDashboard() {
+function StepDot({ index, currentStep }) {
+  const isDone = index <= currentStep;
+  const isCurrent = index === currentStep && currentStep < lastStep;
+
+  return (
+    <div data-step={index} className="relative h-10 w-10 shrink-0">
+      {isCurrent && (
+        <span className="timeline-pulse absolute inset-0 rounded-full bg-[#31583B]/40" />
+      )}
+      <div
+        className={`timeline-dot relative flex h-10 w-10 items-center justify-center rounded-full border ${
+          isDone
+            ? "bg-[#31583B] border-[#31583B] text-[#FAF9F4]"
+            : "bg-[#FAF9F4] border-[#B9C2B5] text-[#7C857C]"
+        }`}
+      >
+        {isDone ? <Check size={18} /> : <Clock size={18} />}
+      </div>
+    </div>
+  );
+}
+
+function AdminComplaintDetails() {
+  const { id } = useParams();
   const navigate = useNavigate();
 
-  const [complaints, setComplaints] = useState([]);
-  const [analytics, setAnalytics] = useState(null);
-  const [search, setSearch] = useState("");
-  const [category, setCategory] = useState("All");
-  const [status, setStatus] = useState("All");
+  const [complaint, setComplaint] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
-  const [lastUpdated, setLastUpdated] = useState(null);
+  const [error, setError] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [actionError, setActionError] = useState("");
 
-  const loadDashboard = async () => {
-    try {
-      const [complaintData, analyticsData] = await Promise.all([
-        getAllComplaints(),
-        getComplaintAnalytics(),
-      ]);
-      setComplaints(complaintData.complaints || []);
-      setAnalytics(analyticsData.analytics);
-      setLastUpdated(new Date());
-    } catch (error) {
-      console.error("Failed to load dashboard:", error);
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
-    }
+  const timelineRef = useRef(null);
+  const fillXRef = useRef(null);
+  const fillYRef = useRef(null);
+
+  const loadComplaint = async () => {
+    const data = await getComplaintById(id);
+    setComplaint(data.complaint);
   };
 
   useEffect(() => {
-    loadDashboard();
-  }, []);
+    const fetchComplaint = async () => {
+      setLoading(true);
+      setError(false);
 
-  const handleRefresh = () => {
-    setRefreshing(true);
-    loadDashboard();
-  };
+      try {
+        await loadComplaint();
+      } catch (err) {
+        console.error("Failed to fetch complaint:", err);
+        setError(true);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const handleDepartmentChange = async (id, department) => {
+    fetchComplaint();
+  }, [id]);
+
+  const runAction = async (action, failureMessage) => {
+    setSaving(true);
+    setActionError("");
+
     try {
-      await assignDepartment(id, department);
-      loadDashboard();
-    } catch (error) {
-      console.error("Failed to assign department:", error);
+      await action();
+      await loadComplaint();
+    } catch (err) {
+      console.error(failureMessage, err);
+      setActionError(failureMessage);
+    } finally {
+      setSaving(false);
     }
   };
 
-  const handleStatusChange = async (id, newStatus) => {
-    try {
-      await updateStatus(id, newStatus);
-      loadDashboard();
-    } catch (error) {
-      console.error("Failed to update status:", error);
-    }
-  };
+  const handleStatusChange = (newStatus) =>
+    runAction(() => updateStatus(id, newStatus), "Could not update the status.");
 
-  const handleDelete = async (id) => {
+  const handleDepartmentChange = (department) =>
+    runAction(
+      () => assignDepartment(id, department),
+      "Could not assign the department."
+    );
+
+  const handleDelete = async () => {
     const confirmDelete = window.confirm(
       "Are you sure you want to delete this complaint?"
     );
 
     if (!confirmDelete) return;
 
+    setSaving(true);
+    setActionError("");
+
     try {
       await deleteComplaint(id);
-      loadDashboard();
-    } catch (error) {
-      console.error("Failed to delete complaint:", error);
+      navigate("/admin/dashboard");
+    } catch (err) {
+      console.error("Failed to delete complaint:", err);
+      setActionError("Could not delete the complaint.");
+      setSaving(false);
     }
   };
 
-  const statusCounts = {
-    pending: complaints.filter((c) => c.status === "Pending").length,
-    underReview: complaints.filter((c) => c.status === "Under Review").length,
-    assigned: complaints.filter((c) => c.status === "Assigned").length,
-    inProgress: complaints.filter((c) => c.status === "In Progress").length,
-    resolved: complaints.filter((c) => c.status === "Resolved").length,
-  };
+  const statusKey = complaint?.status?.toLowerCase();
+  const currentStep = statusToStep[statusKey] ?? 0;
 
-  const statusChartData = STATUSES.map((name) => ({
-    name,
-    count: complaints.filter((c) => c.status === name).length,
-  }));
+  useLayoutEffect(() => {
+    if (loading || !complaint) return;
 
-  const categoryChartData = CATEGORIES.map((name) => ({
-    name,
-    count: complaints.filter((c) => c.category === name).length,
-    color: categoryColors[name],
-  }));
+    const scope = timelineRef.current;
+    const fillX = fillXRef.current;
+    const fillY = fillYRef.current;
+    if (!scope || !fillX || !fillY) return;
 
-  const filteredComplaints = complaints.filter((complaint) => {
-    const term = search.toLowerCase();
+    const fraction = currentStep / lastStep;
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-    const matchesSearch =
-      complaint.title?.toLowerCase().includes(term) ||
-      complaint.location?.toLowerCase().includes(term);
+    const ctx = gsap.context(() => {
+      if (reduceMotion) {
+        gsap.set(fillX, { scaleX: fraction });
+        gsap.set(fillY, { scaleY: fraction });
+        return;
+      }
 
-    const matchesCategory =
-      category === "All" || complaint.category === category;
+      const startDelay = 0.3;
+      const timeline = gsap.timeline({ delay: startDelay });
 
-    const matchesStatus = status === "All" || complaint.status === status;
+      timeline.fromTo(
+        fillX,
+        { scaleX: 0 },
+        { scaleX: fraction, duration: currentStep * segmentDuration, ease: "none" },
+        0
+      );
 
-    return matchesSearch && matchesCategory && matchesStatus;
-  });
+      timeline.fromTo(
+        fillY,
+        { scaleY: 0 },
+        { scaleY: fraction, duration: currentStep * segmentDuration, ease: "none" },
+        0
+      );
 
-  const statCards = [
-    {
-      label: "Total Complaints",
-      value: complaints.length,
-      icon: FileText,
-      iconBg: "bg-[#E8EBDF]",
-      iconColor: "text-[#31583B]",
-      filter: "All",
-    },
-    {
-      label: "Pending",
-      value: statusCounts.pending,
-      icon: Clock,
-      iconBg: "bg-[#F6EBCB]",
-      iconColor: "text-[#8A5E10]",
-      filter: "Pending",
-    },
-    {
-      label: "In Progress",
-      value: statusCounts.inProgress,
-      icon: Loader,
-      iconBg: "bg-[#E3EEF8]",
-      iconColor: "text-[#2F6A9E]",
-      filter: "In Progress",
-    },
-    {
-      label: "Resolved",
-      value: statusCounts.resolved,
-      icon: CheckCheck,
-      iconBg: "bg-[#E8EBDF]",
-      iconColor: "text-[#31583B]",
-      filter: "Resolved",
-    },
-  ];
+      for (let i = 0; i <= currentStep; i++) {
+        const dots = scope.querySelectorAll(`[data-step="${i}"] .timeline-dot`);
+        timeline.fromTo(
+          dots,
+          { scale: 0.5 },
+          { scale: 1, duration: 0.6, ease: "back.out(2)" },
+          i * segmentDuration
+        );
+      }
+
+      if (currentStep < lastStep) {
+        const pulses = scope.querySelectorAll(`[data-step="${currentStep}"] .timeline-pulse`);
+        gsap.fromTo(
+          pulses,
+          { scale: 1, opacity: 0.7 },
+          {
+            scale: 2.2,
+            opacity: 0,
+            duration: 1.6,
+            repeat: -1,
+            ease: "power1.out",
+            delay: startDelay + currentStep * segmentDuration + 0.6,
+          }
+        );
+      }
+    }, scope);
+
+    return () => ctx.revert();
+  }, [loading, complaint, currentStep]);
 
   if (loading) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-[#F5F3EC]">
         <div className="w-10 h-10 border-4 border-[#E8EBDF] border-t-[#31583B] rounded-full animate-spin" />
-        <p className="mt-4 text-[#31583B]/80">Loading dashboard...</p>
+        <p className="mt-4 text-[#31583B]/80">Loading complaint...</p>
       </div>
     );
   }
 
-  return (
-    <div className="min-h-screen bg-[#F5F3EC] px-6 py-8 md:py-10">
-      <div className="max-w-6xl mx-auto">
-        <div className="flex items-center justify-between mb-10">
-          <img
-            src="/images/xeuj-logo-medium-transparent.png"
-            alt="Xeuj"
-            className="h-9 w-auto"
-          />
-
-          <div className="flex items-center gap-4">
-            <p className="hidden sm:block text-xs text-[#31583B]/70 text-right leading-tight">
-              Last updated
-              <br />
-              {lastUpdated
-                ? lastUpdated.toLocaleString("en-GB", {
-                    day: "2-digit",
-                    month: "short",
-                    year: "numeric",
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })
-                : "Not yet"}
-            </p>
-
-            <button
-              onClick={handleRefresh}
-              disabled={refreshing}
-              className="inline-flex items-center gap-2 text-sm font-medium text-[#31583B] border border-[#D9DDD0] bg-[#FAF9F4] hover:border-[#31583B] rounded-lg px-4 py-2 transition disabled:opacity-60"
-            >
-              <RefreshCw size={15} className={refreshing ? "animate-spin" : ""} />
-              Refresh
-            </button>
-          </div>
-        </div>
-
-        <div className="mb-8">
-          <h1 className="text-4xl md:text-5xl font-serif font-light text-[#31583B] mb-2">
-            Admin Dashboard
-          </h1>
-          <p className="text-[#31583B]/80 text-lg">
-            Monitor and manage civic complaints
+  if (error || !complaint) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#F5F3EC] px-6">
+        <div className="bg-[#FAF9F4] border border-[#E8EBDF] rounded-2xl p-8 text-center max-w-md">
+          <h2 className="text-xl font-serif font-light text-[#31583B]">
+            We could not load this complaint.
+          </h2>
+          <p className="text-[#31583B]/80 mt-2">
+            It may have been removed, or the server is unavailable.
           </p>
+          <Link
+            to="/admin/dashboard"
+            className="inline-flex items-center gap-2 text-sm font-medium text-[#31583B] hover:text-[#202923] transition mt-6"
+          >
+            <ArrowLeft size={16} />
+            Back to dashboard
+          </Link>
         </div>
+      </div>
+    );
+  }
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
-          {statCards.map((card) => {
-            const Icon = card.icon;
-            return (
+  const categoryKey = complaint.category?.toLowerCase();
+  const category = categoryConfig[categoryKey] || {
+    label: complaint.category || "Report",
+    icon: CircleDot,
+  };
+  const CategoryIcon = category.icon;
+
+  const hasCoordinates =
+    complaint.coordinates?.lat != null && complaint.coordinates?.lng != null;
+
+  const trackHeightMobile = `${lastStep * 6}rem`;
+
+  return (
+    <div className="min-h-screen bg-[#F5F3EC] py-10 px-6">
+      <div className="max-w-5xl mx-auto">
+        <Reveal>
+          <Link
+            to="/admin/dashboard"
+            className="inline-flex items-center gap-2 text-sm font-medium text-[#31583B] hover:text-[#202923] transition mb-10"
+          >
+            <ArrowLeft size={16} />
+            Back to dashboard
+          </Link>
+
+          <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-6 mb-10">
+            <div>
+              <div className="flex items-center gap-3 mb-4">
+                <span className="h-px w-10 bg-[#31583B]" />
+                <p className="text-xs font-semibold tracking-[0.25em] uppercase text-[#31583B]">
+                  Complaint Review
+                </p>
+              </div>
+              <h1 className="text-4xl md:text-5xl font-serif font-light text-[#31583B] mb-3 break-words">
+                {complaint.title}
+              </h1>
+              <p className="text-[#31583B]/80 text-lg">
+                Review this report, update its status and assign the right department.
+              </p>
+            </div>
+
+            <span className="self-start inline-flex rounded-full bg-[#E8EBDF] px-4 py-2 text-xs font-medium tracking-wide text-[#31583B] whitespace-nowrap">
+              ID: {complaint.complaintId}
+            </span>
+          </div>
+        </Reveal>
+
+        <Reveal delay={0.1}>
+          <div className={`${cardClass} p-6 md:p-8`}>
+            <div className="grid grid-cols-1 md:grid-cols-[1fr_1fr_auto] gap-6 md:items-end">
+              <div>
+                <p className="text-xs uppercase tracking-wide text-[#31583B]/60 mb-2">
+                  Update status
+                </p>
+                <div className="relative">
+                  <select
+                    value={complaint.status || "Pending"}
+                    onChange={(e) => handleStatusChange(e.target.value)}
+                    disabled={saving}
+                    className="appearance-none w-full bg-[#F5F3EC] border border-[#D9DDD0] rounded-lg px-4 py-2.5 pr-10 text-sm text-[#31583B] focus:outline-none focus:border-[#31583B] cursor-pointer disabled:opacity-60"
+                  >
+                    {STATUSES.map((s) => (
+                      <option key={s} value={s}>
+                        {s}
+                      </option>
+                    ))}
+                  </select>
+                  <ChevronDown
+                    size={16}
+                    className="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 text-[#31583B]"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <p className="text-xs uppercase tracking-wide text-[#31583B]/60 mb-2">
+                  Assign department
+                </p>
+                <div className="relative">
+                  <select
+                    value={complaint.department || "Pending"}
+                    onChange={(e) => handleDepartmentChange(e.target.value)}
+                    disabled={saving}
+                    className="appearance-none w-full bg-[#F5F3EC] border border-[#D9DDD0] rounded-lg px-4 py-2.5 pr-10 text-sm text-[#31583B] focus:outline-none focus:border-[#31583B] cursor-pointer disabled:opacity-60"
+                  >
+                    {DEPARTMENTS.map((d) => (
+                      <option key={d} value={d}>
+                        {d}
+                      </option>
+                    ))}
+                  </select>
+                  <ChevronDown
+                    size={16}
+                    className="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 text-[#31583B]"
+                  />
+                </div>
+              </div>
+
               <button
-                key={card.label}
-                onClick={() => setStatus(card.filter)}
-                className={`${cardClass} group flex items-center gap-4 p-5 text-left hover:shadow-md transition`}
+                onClick={handleDelete}
+                disabled={saving}
+                className="inline-flex items-center justify-center gap-2 text-sm font-medium text-[#B4433C] border border-[#EBC7C2] bg-[#FBF1EF] hover:bg-[#F6E2DE] rounded-lg px-4 py-2.5 transition disabled:opacity-60"
               >
-                <div
-                  className={`h-12 w-12 shrink-0 rounded-xl flex items-center justify-center ${card.iconBg}`}
-                >
-                  <Icon size={20} className={card.iconColor} />
-                </div>
-
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm text-[#31583B]/70">{card.label}</p>
-                  <p className="text-3xl font-serif font-light text-[#31583B] mt-1">
-                    {card.value}
-                  </p>
-                </div>
-
-                <ArrowRight
-                  size={18}
-                  className="text-[#31583B] shrink-0 transition group-hover:translate-x-1"
-                />
+                <Trash2 size={15} />
+                Delete complaint
               </button>
-            );
-          })}
-        </div>
+            </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-[1.3fr_1fr] gap-6 mb-8">
-          <div className={`${cardClass} p-6`}>
-            <h2 className="text-2xl font-serif font-light text-[#31583B] mb-6">
-              Complaint Status
-            </h2>
-
-            <div className="h-[300px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart
-                  data={statusChartData}
-                  margin={{ top: 20, right: 10, left: -10, bottom: 0 }}
-                >
-                  <CartesianGrid vertical={false} stroke="#E8EBDF" />
-                  <XAxis
-                    dataKey="name"
-                    axisLine={false}
-                    tickLine={false}
-                    tick={{ fill: "#7C857C", fontSize: 12 }}
-                    interval={0}
-                  />
-                  <YAxis
-                    allowDecimals={false}
-                    axisLine={false}
-                    tickLine={false}
-                    tick={{ fill: "#7C857C", fontSize: 12 }}
-                  />
-                  <Tooltip
-                    cursor={{ fill: "#E8EBDF", opacity: 0.5 }}
-                    contentStyle={tooltipStyle}
-                  />
-                  <Bar
-                    dataKey="count"
-                    fill="#31583B"
-                    radius={[6, 6, 0, 0]}
-                    maxBarSize={56}
-                  >
-                    <LabelList
-                      dataKey="count"
-                      position="top"
-                      fill="#31583B"
-                      fontSize={12}
-                    />
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
+            <div className="mt-4 min-h-[20px]">
+              {saving && (
+                <p className="text-sm text-[#31583B]/70">Saving changes...</p>
+              )}
+              {actionError && (
+                <p className="text-sm text-[#B4433C]">{actionError}</p>
+              )}
             </div>
           </div>
+        </Reveal>
 
-          <div className={`${cardClass} p-6`}>
-            <h2 className="text-2xl font-serif font-light text-[#31583B] mb-6">
-              Complaint Categories
-            </h2>
-
-            <div className="flex flex-col sm:flex-row items-center gap-6">
-              <div className="h-[220px] w-full sm:w-1/2 min-w-0">
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={categoryChartData}
-                      dataKey="count"
-                      nameKey="name"
-                      cx="50%"
-                      cy="50%"
-                      outerRadius={100}
-                      stroke="#FAF9F4"
-                      strokeWidth={2}
-                      label={{ fill: "#FAF9F4", fontSize: 12 }}
-                      labelLine={false}
-                    >
-                      {categoryChartData.map((entry) => (
-                        <Cell key={entry.name} fill={entry.color} />
-                      ))}
-                    </Pie>
-                    <Tooltip contentStyle={tooltipStyle} />
-                  </PieChart>
-                </ResponsiveContainer>
-              </div>
-
-              <ul className="w-full sm:w-1/2 space-y-4 sm:border-l sm:border-[#E8EBDF] sm:pl-6">
-                {categoryChartData.map((item) => (
-                  <li
-                    key={item.name}
-                    className="flex items-center justify-between text-sm text-[#31583B]"
-                  >
-                    <span className="flex items-center gap-3">
-                      <span
-                        className="h-3 w-3 rounded-full"
-                        style={{ backgroundColor: item.color }}
-                      />
-                      {item.name}
-                    </span>
-                    <span className="font-medium">{item.count}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-        </div>
-
-        <div className={`${cardClass} p-6 mb-8`}>
-          <div className="flex items-center gap-3 mb-6">
-            <MapPin size={20} className="text-[#31583B]" />
-            <h2 className="text-2xl font-serif font-light text-[#31583B]">
-              Complaint Location
-            </h2>
-          </div>
-          <ComplaintHeatmap complaints={analytics?.complaints || []} />
-        </div>
-
-        <div className={`${cardClass} overflow-hidden`}>
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 p-6">
-            <h2 className="text-2xl font-serif font-light text-[#31583B]">
-              Complaints
-            </h2>
-
-            <div className="flex flex-col md:flex-row gap-3">
-              <div className="relative md:w-64">
-                <Search
-                  size={16}
-                  className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#31583B]"
-                />
-                <input
-                  type="text"
-                  placeholder="Search by title or location..."
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  className="w-full bg-[#F5F3EC] border border-[#D9DDD0] rounded-lg pl-10 pr-3 py-2.5 text-sm text-[#31583B] placeholder:text-[#9AA19A] focus:outline-none focus:border-[#31583B] transition"
-                />
-              </div>
-
-              <div className="relative">
-                <LayoutGrid
-                  size={16}
-                  className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#31583B] pointer-events-none"
-                />
-                <select
-                  value={category}
-                  onChange={(e) => setCategory(e.target.value)}
-                  className="appearance-none w-full bg-[#F5F3EC] border border-[#D9DDD0] rounded-lg pl-10 pr-8 py-2.5 text-sm text-[#31583B] focus:outline-none focus:border-[#31583B] cursor-pointer"
-                >
-                  <option value="All">All Categories</option>
-                  {CATEGORIES.map((c) => (
-                    <option key={c} value={c}>
-                      {c}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="relative">
-                <ShieldCheck
-                  size={16}
-                  className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#31583B] pointer-events-none"
-                />
-                <select
-                  value={status}
-                  onChange={(e) => setStatus(e.target.value)}
-                  className="appearance-none w-full bg-[#F5F3EC] border border-[#D9DDD0] rounded-lg pl-10 pr-8 py-2.5 text-sm text-[#31583B] focus:outline-none focus:border-[#31583B] cursor-pointer"
-                >
-                  <option value="All">All Status</option>
-                  {STATUSES.map((s) => (
-                    <option key={s} value={s}>
-                      {s}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-          </div>
-
-          <div className="overflow-x-auto">
-            <table className="w-full border-collapse text-sm">
-              <thead className="bg-[#EEF0E6] text-[#31583B] text-xs uppercase tracking-wide">
-                <tr>
-                  <th className="px-6 py-3 text-left font-semibold">#</th>
-                  <th className="px-6 py-3 text-left font-semibold">Title</th>
-                  <th className="px-6 py-3 text-left font-semibold">Category</th>
-                  <th className="px-6 py-3 text-left font-semibold">Location</th>
-                  <th className="px-6 py-3 text-left font-semibold">Department</th>
-                  <th className="px-6 py-3 text-left font-semibold">Status</th>
-                  <th className="px-6 py-3 text-left font-semibold">Actions</th>
-                </tr>
-              </thead>
-
-              <tbody className="text-[#31583B]">
-                {filteredComplaints.length > 0 ? (
-                  filteredComplaints.map((complaint, index) => (
-                    <tr
-                      key={complaint._id}
-                      className="border-t border-[#E8EBDF] hover:bg-[#F5F3EC]/70 transition"
-                    >
-                      <td className="px-6 py-4 text-[#31583B]/70">{index + 1}</td>
-
-                      <td className="px-6 py-4 font-medium">{complaint.title}</td>
-
-                      <td className="px-6 py-4">{complaint.category}</td>
-
-                      <td className="px-6 py-4 max-w-xs">
-                        <p className="truncate">{complaint.location}</p>
-                      </td>
-
-                      <td className="px-6 py-4">
-                        <select
-                          value={complaint.department || "Pending"}
-                          onChange={(e) =>
-                            handleDepartmentChange(complaint._id, e.target.value)
-                          }
-                          className="bg-transparent border border-[#D9DDD0] rounded-lg px-2.5 py-1.5 text-xs text-[#31583B] focus:outline-none focus:border-[#31583B] cursor-pointer"
-                        >
-                          {DEPARTMENTS.map((d) => (
-                            <option key={d} value={d}>
-                              {d}
-                            </option>
-                          ))}
-                        </select>
-                      </td>
-
-                      <td className="px-6 py-4">
-                        <div className="relative inline-flex items-center">
-                          <span
-                            className={`pointer-events-none absolute left-3 h-2 w-2 rounded-full ${
-                              statusDotColors[complaint.status] || statusDotColors.Pending
-                            }`}
-                          />
-                          <select
-                            value={complaint.status || "Pending"}
-                            onChange={(e) =>
-                              handleStatusChange(complaint._id, e.target.value)
-                            }
-                            className="appearance-none bg-transparent border border-[#D9DDD0] rounded-lg pl-7 pr-7 py-1.5 text-xs font-medium text-[#31583B] focus:outline-none focus:border-[#31583B] cursor-pointer"
-                          >
-                            {STATUSES.map((s) => (
-                              <option key={s} value={s}>
-                                {s}
-                              </option>
-                            ))}
-                          </select>
-                          <ChevronDown
-                            size={14}
-                            className="pointer-events-none absolute right-2.5 text-[#31583B]/70"
-                          />
-                        </div>
-                      </td>
-
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-2">
-                          <button
-                            onClick={() => navigate(`/admin/complaint/${complaint._id}`)}
-                            className="inline-flex items-center gap-1.5 text-xs font-medium text-[#31583B] border border-[#D9DDD0] bg-[#FAF9F4] hover:border-[#31583B] rounded-lg px-3 py-1.5 transition"
-                          >
-                            <Eye size={14} />
-                            View
-                          </button>
-
-                          <button
-                            onClick={() => handleDelete(complaint._id)}
-                            className="inline-flex items-center gap-1.5 text-xs font-medium text-[#B4433C] border border-[#EBC7C2] bg-[#FBF1EF] hover:bg-[#F6E2DE] rounded-lg px-3 py-1.5 transition"
-                          >
-                            <Trash2 size={14} />
-                            Delete
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))
+        <Reveal delay={0.15}>
+          <div className={`${cardClass} mt-8 p-6 md:p-8`}>
+            <div className="flex flex-col md:flex-row gap-8">
+              <div className="w-full md:w-80 h-60 md:h-64 shrink-0 rounded-xl overflow-hidden bg-[#E8EBDF] flex items-center justify-center">
+                {complaint.image ? (
+                  <img
+                    src={complaint.image}
+                    alt={complaint.title}
+                    className="w-full h-full object-cover"
+                  />
                 ) : (
-                  <tr>
-                    <td colSpan="7" className="text-center px-6 py-10 text-[#31583B]/70">
-                      No complaints found.
-                    </td>
-                  </tr>
+                  <MapPin size={32} className="text-[#31583B]" />
                 )}
-              </tbody>
-            </table>
+              </div>
+
+              <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-x-10 gap-y-7 md:border-l md:border-[#E8EBDF] md:pl-10">
+                <DetailField label="Category" icon={CategoryIcon}>
+                  {category.label}
+                </DetailField>
+
+                <DetailField label="Location" icon={MapPin}>
+                  {complaint.location || "Not specified"}
+                </DetailField>
+
+                <DetailField label="Department" icon={Building2}>
+                  {complaint.department || "Not yet assigned"}
+                </DetailField>
+
+                <DetailField label="Reported on" icon={Calendar}>
+                  {formatDateTime(complaint.createdAt)}
+                </DetailField>
+
+                <DetailField label="Last updated" icon={Clock}>
+                  {formatDateTime(complaint.updatedAt)}
+                </DetailField>
+
+                <DetailField label="Coordinates">
+                  {hasCoordinates
+                    ? `${complaint.coordinates.lat.toFixed(5)}, ${complaint.coordinates.lng.toFixed(5)}`
+                    : "Not available"}
+                </DetailField>
+
+                <div className="sm:col-span-2">
+                  <DetailField label="Description">
+                    {complaint.description || "No description provided."}
+                  </DetailField>
+                </div>
+              </div>
+            </div>
           </div>
-        </div>
+        </Reveal>
+
+        {hasCoordinates && (
+          <Reveal delay={0.2}>
+            <div className={`${cardClass} mt-8 p-6 md:p-8`}>
+              <h2 className="text-2xl font-serif font-light text-[#31583B] mb-6">
+                Exact Location
+              </h2>
+              <LocationMap
+                latitude={complaint.coordinates.lat}
+                longitude={complaint.coordinates.lng}
+                readOnly
+                onLocationChange={() => {}}
+              />
+            </div>
+          </Reveal>
+        )}
+
+        <Reveal delay={0.25}>
+          <div className={`${cardClass} mt-8 p-6 md:p-8`}>
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-10">
+              <h2 className="text-2xl font-serif font-light text-[#31583B]">
+                Progress Timeline
+              </h2>
+              <p className="text-sm text-[#31583B]/80">
+                Current status:{" "}
+                <span className="font-medium text-[#31583B]">
+                  {complaint.status || "Pending"}
+                </span>
+              </p>
+            </div>
+
+            <div ref={timelineRef}>
+              <div className="hidden md:block relative">
+                <div className="absolute top-[19px] left-[12.5%] right-[12.5%] h-[2px] bg-[#D9DDD0]" />
+                <div
+                  ref={fillXRef}
+                  className="absolute top-[19px] left-[12.5%] right-[12.5%] h-[2px] bg-[#31583B] origin-left"
+                  style={{ transform: "scaleX(0)" }}
+                />
+
+                <div className="relative grid grid-cols-4">
+                  {timelineSteps.map((step, index) => {
+                    const isDone = index <= currentStep;
+                    const subLabel =
+                      index === 0
+                        ? formatDate(complaint.createdAt)
+                        : isDone
+                        ? "Completed"
+                        : "Pending";
+
+                    return (
+                      <div key={step} className="flex flex-col items-center text-center px-2">
+                        <StepDot index={index} currentStep={currentStep} />
+                        <h3
+                          className={`mt-4 font-medium ${
+                            isDone ? "text-[#31583B]" : "text-[#7C857C]"
+                          }`}
+                        >
+                          {step}
+                        </h3>
+                        <p className="text-sm text-[#31583B]/70 mt-1">{subLabel}</p>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div className="md:hidden relative">
+                <div
+                  className="absolute left-5 top-5 w-[2px] -translate-x-px bg-[#D9DDD0]"
+                  style={{ height: trackHeightMobile }}
+                />
+                <div
+                  ref={fillYRef}
+                  className="absolute left-5 top-5 w-[2px] -translate-x-px bg-[#31583B] origin-top"
+                  style={{ height: trackHeightMobile, transform: "scaleY(0)" }}
+                />
+
+                <div className="relative">
+                  {timelineSteps.map((step, index) => {
+                    const isDone = index <= currentStep;
+                    const subLabel =
+                      index === 0
+                        ? formatDate(complaint.createdAt)
+                        : isDone
+                        ? "Completed"
+                        : "Pending";
+
+                    return (
+                      <div key={step} className="flex items-start gap-4 h-24">
+                        <StepDot index={index} currentStep={currentStep} />
+                        <div className="pt-1">
+                          <h3
+                            className={`font-medium ${
+                              isDone ? "text-[#31583B]" : "text-[#7C857C]"
+                            }`}
+                          >
+                            {step}
+                          </h3>
+                          <p className="text-sm text-[#31583B]/70 mt-1">{subLabel}</p>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          </div>
+        </Reveal>
       </div>
     </div>
   );
 }
 
-export default AdminDashboard;
+export default AdminComplaintDetails;
