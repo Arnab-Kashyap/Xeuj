@@ -1,18 +1,43 @@
 import { SignIn } from "@clerk/clerk-react";
+import { Link } from "react-router-dom";
+import { ArrowLeft } from "lucide-react";
+
+const clerkAppearance = {
+  variables: {
+    colorPrimary: "#31583B",
+    colorBackground: "#FAF9F4",
+    colorText: "#31583B",
+    borderRadius: "0.75rem",
+  },
+};
 
 function Login() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-green-50">
-      <div className="w-full max-w-md bg-white p-8 rounded-2xl shadow-sm">
-        <h1 className="text-3xl font-bold text-center mb-6">
-          Citizen Login
-        </h1>
+    <div className="min-h-screen bg-[#F5F3EC] flex items-center justify-center px-6 py-16">
+      <div className="w-full max-w-md">
+        <Link
+          to="/access"
+          className="inline-flex items-center gap-2 text-sm font-medium text-[#31583B] hover:text-[#202923] transition mb-10"
+        >
+          <ArrowLeft size={16} />
+          Back
+        </Link>
 
-        <SignIn
-          routing="path"
-          path="/login"
-          signUpUrl="/register"
-        />
+        <div className="bg-[#FAF9F4] border border-[#E8EBDF] rounded-2xl shadow-sm p-8">
+          <h1 className="text-3xl font-serif font-light text-[#31583B] text-center mb-2">
+            Citizen Login
+          </h1>
+          <p className="text-center text-[#31583B]/70 mb-8">
+            Sign in to report issues and track your complaints.
+          </p>
+
+          <SignIn
+            routing="path"
+            path="/login"
+            signUpUrl="/register"
+            appearance={clerkAppearance}
+          />
+        </div>
       </div>
     </div>
   );
